@@ -1,6 +1,6 @@
-import { readFileSync } from 'fs'
-
 import { calculateIncrease, calculateGroupedIncrease } from '~/puzzle/day-1'
+import { getInput } from '~/inputs'
+
 
 describe('Day 1 Part 1', () => {
   it('should calculate no increase', () => {
@@ -60,8 +60,7 @@ describe('Day 1 Part 1', () => {
   })
 
   it('should answer puzzle', () => {
-    // @TODO reader util
-    const report = readFileSync('./src/inputs/day-1-1.txt', { encoding: 'utf8' })
+    const report = getInput('day-1-1')
 
     expect(calculateIncrease(report)).toMatchInlineSnapshot(`1226`)
   })
@@ -86,8 +85,7 @@ describe('Day 1 Part 2', () => {
   })
 
   it('should answer puzzle', () => {
-    // @TODO reader util
-    const report = readFileSync('./src/inputs/day-1-2.txt', { encoding: 'utf8' })
+    const report = getInput('day-1-2')
 
     expect(calculateGroupedIncrease(report)).toMatchInlineSnapshot(`1252`)
   })
