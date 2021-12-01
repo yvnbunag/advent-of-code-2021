@@ -9,7 +9,6 @@ Coding challenge project with Jest, ESLint and TypeScript
 - [Scaffold setup](#scaffold-setup)
 - [Usage](#usage)
   - [Running tests](#running-tests)
-  - [Running challenges / TypeScript files](#running-challenges--typescript-files)
   - [Linting code](#linting-code)
 - [Scaffold](#scaffold)
 
@@ -55,16 +54,10 @@ git push --set-upstream origin <branch-name>
 
 ```sh
 # Specific test specs
-pnpm test:focused test/specs/unit/add.spec.ts
+pnpm test:focused test/specs/puzzle/day-1.spec.ts
 
 # All
 pnpm test
-```
-
-### Running challenges / TypeScript files
-
-```sh
-pnpm eval src/challenges/add.ts
 ```
 
 ### Linting code
