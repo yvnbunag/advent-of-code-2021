@@ -26,6 +26,9 @@
   "coveragePathIgnorePatterns": [
     "src/challenges"
   ],
+  "watchPathIgnorePatterns": [
+    "reports"
+  ],
   "coverageThreshold": {
     "global": {
       "lines": 95,

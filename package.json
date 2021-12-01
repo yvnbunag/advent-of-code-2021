@@ -1,5 +1,5 @@
 {
-  "name": "Advent of Code 2021",
+  "name": "advent-of-code-2021",
   "version": "0.0.1",
   "description": "",
   "author": "Ian <jianbunag@gmail.com>",
@@ -7,6 +7,7 @@
   "scripts": {
     "eval": "ts-node -r tsconfig-paths/register",
     "test": "jest test/specs --config=jest.config.json",
+    "test:watch": "jest --config=jest.config.json --watch",
     "test:focused": "jest --config=jest.config.json",
     "lint": "eslint --ext .ts src test types",
     "lint:fix": "eslint --ext .ts src test types --fix",
