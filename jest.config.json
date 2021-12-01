@@ -1,0 +1,43 @@
+{
+  "setupFilesAfterEnv": ["<rootDir>/test/setup/setup-files-after-env.ts"],
+  "globalSetup": "<rootDir>/test/setup/global/setup.ts",
+  "globalTeardown": "<rootDir>/test/setup/global/teardown.ts",
+  "transform": {
+    "^.+\\.(ts)$": "ts-jest"
+  },
+  "bail": false,
+  "testEnvironment": "node",
+  "maxWorkers": "50%",
+  "reporters": [
+    "default",
+    [
+      "jest-stare",
+      {
+        "resultDir": "reports/latest/jest-stare",
+        "reportTitle": "Challenge Test Report",
+        "coverageLink": "./../coverage/index.html"
+      }
+    ]
+  ],
+  "collectCoverage": true,
+  "collectCoverageFrom": [
+    "src/**/*.ts"
+  ],
+  "coveragePathIgnorePatterns": [
+    "src/challenges"
+  ],
+  "coverageThreshold": {
+    "global": {
+      "lines": 95,
+      "statements": 95
+    }
+  },
+  "coverageDirectory": "reports/latest/coverage",
+  "coverageReporters": ["json", "html", "text-summary"],
+  "moduleNameMapper": {
+    "^~/(.*)$": "<rootDir>/src/$1",
+    "^@/(.*)$": "<rootDir>/types/$1",
+    "^#/(.*)$": "<rootDir>/test/$1",
+    "^\\+/(.*)$": "<rootDir>/$1"
+  }
+}

@@ -1,0 +1,31 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "es6",
+		"lib": ["es2019"],
+		"rootDir": "./",
+		"allowJs": false,
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"strict": true,
+		"sourceMap": true,
+		"baseUrl": ".",
+		"paths": {
+			"~/*": ["./src/*"],
+			"@/*": ["./types/*"],
+			"#/*": ["./test/*"],
+			"+/*": ["./*"]
+		}
+	},
+	"ts-node": {
+		"files": true
+	},
+	"include": [
+		"types/**/*",
+		"src/**/*",
+		"test/**/*",
+	],
+	"exclude": [
+		"node_modules",
+	]
+}
