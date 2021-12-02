@@ -1,7 +1,6 @@
 import { calculateIncrease, calculateGroupedIncrease } from '~/puzzle/day-1'
 import { getInput } from '~/inputs'
 
-
 describe('Day 1 Part 1', () => {
   it('should calculate no increase', () => {
     const report = `
