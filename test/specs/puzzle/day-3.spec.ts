@@ -27,7 +27,7 @@ describe('Day 3 Part 1', () => {
   })
 
   it('should answer puzzle', () => {
-    const report = getInput('day-3-1')
+    const report = getInput('day-3')
     const rate = calculateRates(report)
     const answer = parseInt(rate.gamma, 2) * parseInt(rate.epsilon, 2)
 
@@ -61,7 +61,7 @@ describe.only('Day 3 Part 2', () => {
   })
 
   it('should answer puzzle', () => {
-    const report = getInput('day-3-2')
+    const report = getInput('day-3')
     const lifeSupport = calculateLifeSupport(report)
     const answer = parseInt(lifeSupport.O2, 2) * parseInt(lifeSupport.CO2, 2)
 

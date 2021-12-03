@@ -59,7 +59,7 @@ describe('Day 1 Part 1', () => {
   })
 
   it('should answer puzzle', () => {
-    const report = getInput('day-1-1')
+    const report = getInput('day-1')
 
     expect(calculateIncrease(report)).toMatchInlineSnapshot(`1226`)
   })
@@ -84,7 +84,7 @@ describe('Day 1 Part 2', () => {
   })
 
   it('should answer puzzle', () => {
-    const report = getInput('day-1-2')
+    const report = getInput('day-1')
 
     expect(calculateGroupedIncrease(report)).toMatchInlineSnapshot(`1252`)
   })

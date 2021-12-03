@@ -18,7 +18,7 @@ describe('Day 2 Part 1', () => {
   })
 
   it('should answer puzzle', () => {
-    const input = getInput('day-2-1')
+    const input = getInput('day-2')
     const position = calculatePosition(input)
     const answer = position.horizontal * position.depth
 
@@ -43,7 +43,7 @@ describe('Day 2 Part 2', () => {
   })
 
   it('should answer puzzle', () => {
-    const input = getInput('day-2-2')
+    const input = getInput('day-2')
     const position = calculateComplicatedPosition(input)
     const answer = position.horizontal * position.depth
 
