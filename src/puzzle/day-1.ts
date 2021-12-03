@@ -1,6 +1,5 @@
 import { parseInputToList } from '~/puzzle/utils'
 
-/** Day 1 Part 1 */
 export function calculateIncrease(report: string): number {
   return parseInputToList(report)
     .map(Number)
@@ -13,7 +12,6 @@ export function calculateIncrease(report: string): number {
     }, 0)
 }
 
-/** Day 1 Part 2 */
 export function calculateGroupedIncrease(report: string) {
   const values = parseInputToList(report).map(Number)
   const windowedValues = values

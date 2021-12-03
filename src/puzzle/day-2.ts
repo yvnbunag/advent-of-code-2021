@@ -14,7 +14,6 @@ function parseInputToInstruction(input: string): Array<[string, number]> {
     .map(([instruction, value]) => [instruction, +value])
 }
 
-/** Day 2 Part 1 */
 export function calculatePosition(input: string): Position {
   const instructions = parseInputToInstruction(input)
 
@@ -48,7 +47,6 @@ export function calculatePosition(input: string): Position {
   )
 }
 
-/** Day 2 Part 2 */
 export function calculateComplicatedPosition(input: string): Position {
   const instructions = parseInputToInstruction(input)
 

@@ -1,7 +1,7 @@
 import { calculatePosition, calculateComplicatedPosition } from '~/puzzle/day-2'
 import { getInput } from '~/inputs'
 
-describe('Day 2 Part 1', () => {
+describe('Part 1', () => {
   it('should answer example', () => {
     const input = `
       forward 5
@@ -26,7 +26,7 @@ describe('Day 2 Part 1', () => {
   })
 })
 
-describe('Day 2 Part 2', () => {
+describe('Part 2', () => {
   it('should answer example', () => {
     const input = `
       forward 5
