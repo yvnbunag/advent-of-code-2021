@@ -9,7 +9,7 @@ import { getInput } from '~/inputs'
 
 import type { Cell, Board } from '~/puzzle/day-4'
 
-describe('Part 1', () => {
+describe('Methods', () => {
   // Cell called generator
   function O(value = 0): Cell & { called: true } {
     return { value, called: true }
@@ -101,7 +101,9 @@ describe('Part 1', () => {
       expect(getTargetCells(sharedBoard)).toEqual([true, true, true])
     })
   })
+})
 
+describe('Part 1', () => {
   it('should answer example', () => {
     const data = `
       7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1

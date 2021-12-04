@@ -62,7 +62,7 @@ function mapBoards(rawBoards: Array<string>): Array<Board> {
   return [firstBoard, ...mapBoards(nextRawBoards)]
 }
 
-function parseGame(data: string): Game {
+function initializeGame(data: string): Game {
   const [rawSequence, ...rawBoards] = parseInputToList(data)
   const sequence = rawSequence.split(',').map(Number)
   const boards = mapBoards(rawBoards)
@@ -100,10 +100,10 @@ const {
     return injectedBoard as IndexedBoard
   }
 
-  function extractBoardIndex(board: Board | IndexedBoard): number {
+  function extractBoardIndex(board: Board | IndexedBoard): number| undefined {
     if (isIndexedBoard(board)) return board[boardIndexKey]
 
-    return -1
+    return undefined
   }
 
   return {
@@ -113,51 +113,44 @@ const {
 })()
 
 export function playBingo(data: string): Winner {
-  let game = parseGame(data)
-  let winnerIndex = -1
-  let lastCall = -1
+  function play(game: Game): Winner {
+    const [call, ...nextSequence] = game.sequence
+    const playedBoards = game.boards.map((board) => markBoard(board, call))
+    const winner = playedBoards.findIndex(hasWon)
 
-  while (winnerIndex < 0) {
-    const { sequence, boards } = game
-    const [call, ...nextSequence] = sequence
-    const nextBoards = boards.map((board) => markBoard(board, call))
+    if (winner < 0) {
+      return play({ sequence: nextSequence, boards: playedBoards })
+    }
 
-    winnerIndex = nextBoards.findIndex(hasWon)
-    lastCall = call
-    game = { sequence: nextSequence, boards: nextBoards }
+    return {
+      id: winner + 1,
+      score: calculateScore(playedBoards[winner], call),
+    }
   }
 
-  const id = winnerIndex + 1
-  const score = calculateScore(game.boards[winnerIndex], lastCall)
-
-  return { id, score }
+  return play(initializeGame(data))
 }
 
 export function playInvertedBingo(data: string): Array<Winner> {
-  let game = parseGame(data)
-  let remainingBoards: Array<Board> = []
-  let lastCall = -1
+  function play(game: Game): Array<Winner> {
+    const [call, ...nextSequence] = game.sequence
+    const playedBoards = game.boards.map((board, index) =>
+      injectBoardIndex(
+        markBoard(board, call),
+        extractBoardIndex(board) || index,
+      ),
+    )
+    const continuingBoards = playedBoards.filter(not(hasWon))
 
-  game.boards = game.boards
-    .map((board, index) => injectBoardIndex(board, index))
+    if (continuingBoards.length) {
+      return play({ sequence: nextSequence, boards: continuingBoards })
+    }
 
-  while(game.boards.length) {
-    const { sequence, boards } = game
-    const [call, ...nextSequence] = sequence
-    const nextBoards = boards.map((board) => {
-      return injectBoardIndex(markBoard(board, call), extractBoardIndex(board))
-    })
-    const continuingBoards = nextBoards.filter(not(hasWon))
-
-    remainingBoards = nextBoards
-    lastCall = call
-    game = { sequence: nextSequence, boards: continuingBoards }
+    return playedBoards.map((board) => ({
+      id: Number(extractBoardIndex(board)) + 1,
+      score: calculateScore(board, call),
+    }))
   }
 
-  return remainingBoards.map((board) => {
-    return {
-      id: Number(extractBoardIndex(board)) + 1,
-      score: calculateScore(board, lastCall),
-    }
-  })
+  return play(initializeGame(data))
 }
