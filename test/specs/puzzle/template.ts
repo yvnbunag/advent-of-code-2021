@@ -1,7 +1,11 @@
 import { first, second } from '~/puzzle/template'
 import { getInput } from '~/inputs'
 
-describe('Part 1', () => {
+describe('Methods', () => {
+  /** Methods */
+})
+
+describe('Part 1 - first', () => {
   it('should answer example', () => {
     const data = ``
 
@@ -15,7 +19,7 @@ describe('Part 1', () => {
   })
 })
 
-describe('Part 2', () => {
+describe('Part 2 - second', () => {
   it('should answer example', () => {
     const data = ``
 
