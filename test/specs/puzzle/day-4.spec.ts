@@ -3,31 +3,31 @@ import {
   hasWon,
   markBoard,
   playBingo,
-  playLosingBingo,
+  playInvertedBingo,
 } from '~/puzzle/day-4'
 import { getInput } from '~/inputs'
 
 import type { Cell, Board } from '~/puzzle/day-4'
 
 describe('Part 1', () => {
-  // Called generator
-  function y(value = 0): Cell & { called: true } {
+  // Cell called generator
+  function O(value = 0): Cell & { called: true } {
     return { value, called: true }
   }
 
-  // Not called generator
-  function x(value = 0): Cell & { called: false } {
+  // Cell not called generator
+  function X(value = 0): Cell & { called: false } {
     return { value, called: false }
   }
 
   describe('calculateScore', () => {
     it('should calculate score', () => {
       const board: Board = [
-        [y(14), y(21), y(17), y(24), y(4)],
-        [x(10), x(16), x(15), y(9), x(19)],
-        [x(18), x(8), y(23), x(26), x(20)],
-        [x(22), y(11), x(13), x(6), y(5)],
-        [y(2), y(0), x(12), x(3), y(7)],
+        [O(14), O(21), O(17), O(24), O( 4)],
+        [X(10), X(16), X(15), O( 9), X(19)],
+        [X(18), X( 8), O(23), X(26), X(20)],
+        [X(22), O(11), X(13), X( 6), O( 5)],
+        [O( 2), O( 0), X(12), X( 3), O( 7)],
       ]
       expect(calculateScore(board, 24)).toBe(4512)
     })
@@ -36,11 +36,11 @@ describe('Part 1', () => {
   describe('hasWon', () => {
     it('should determine if board has won with vertical combination', () => {
       const board: Board = [
-        [y(), x(), x(), x(), x()],
-        [y(), x(), x(), x(), x()],
-        [y(), x(), x(), x(), x()],
-        [y(), x(), x(), x(), x()],
-        [y(), x(), x(), x(), x()],
+        [O(), X(), X(), X(), X()],
+        [O(), X(), X(), X(), X()],
+        [O(), X(), X(), X(), X()],
+        [O(), X(), X(), X(), X()],
+        [O(), X(), X(), X(), X()],
       ]
 
       expect(hasWon(board)).toBeTruthy()
@@ -48,11 +48,11 @@ describe('Part 1', () => {
 
     it('should determine if board has won with horizontal combination', () => {
       const board: Board = [
-        [y(), y(), y(), y(), y()],
-        [x(), x(), x(), x(), x()],
-        [x(), x(), x(), x(), x()],
-        [x(), x(), x(), x(), x()],
-        [x(), x(), x(), x(), x()],
+        [O(), O(), O(), O(), O()],
+        [X(), X(), X(), X(), X()],
+        [X(), X(), X(), X(), X()],
+        [X(), X(), X(), X(), X()],
+        [X(), X(), X(), X(), X()],
       ]
 
       expect(hasWon(board)).toBeTruthy()
@@ -60,11 +60,11 @@ describe('Part 1', () => {
 
     it('should determine if board has not won', () => {
       const board: Board = [
-        [y(), y(), x(), y(), y()],
-        [x(), x(), x(), x(), x()],
-        [x(), x(), x(), x(), x()],
-        [x(), x(), x(), x(), x()],
-        [x(), x(), x(), x(), x()],
+        [O(), O(), X(), O(), O()],
+        [O(), X(), X(), X(), X()],
+        [X(), X(), X(), X(), X()],
+        [O(), X(), X(), X(), X()],
+        [O(), X(), X(), X(), X()],
       ]
 
       expect(hasWon(board)).toBeFalsy()
@@ -73,28 +73,32 @@ describe('Part 1', () => {
 
   describe('markBoard', () => {
     let sharedBoard: Board = [
-      [x(1), y(), x(), y(), y()],
-      [x(), x(), x(), x(), x()],
-      [x(), x(), x(2), x(), x()],
-      [x(), x(), x(), x(), x()],
-      [x(), x(), x(), x(), x(3)],
+      [X(1), O( ), X( ), O( ), O( )],
+      [X( ), X( ), X( ), X( ), X( )],
+      [X( ), X( ), X(2), X( ), X( )],
+      [X( ), X( ), X( ), X( ), X( )],
+      [X( ), X( ), X( ), X( ), X(3)],
     ]
+    function getTargetCells(board: Board): Array<boolean> {
+      return [board[0][0], board[2][2], board[4][4]].map(({ called }) => called)
+    }
+
     it('should mark board after 1 pass', () => {
       sharedBoard = markBoard(sharedBoard, 1)
 
-      expect(sharedBoard[0][0].called).toBeTruthy()
+      expect(getTargetCells(sharedBoard)).toEqual([true, false, false])
     })
 
     it('should mark board after 2 passes', () => {
       sharedBoard = markBoard(sharedBoard, 2)
 
-      expect(sharedBoard[2][2].called).toBeTruthy()
+      expect(getTargetCells(sharedBoard)).toEqual([true, true, false])
     })
 
     it('should mark board after 3 passes', () => {
       sharedBoard = markBoard(sharedBoard, 3)
 
-      expect(sharedBoard[4][4].called).toBeTruthy()
+      expect(getTargetCells(sharedBoard)).toEqual([true, true, true])
     })
   })
 
@@ -120,62 +124,55 @@ describe('Part 1', () => {
       22 11 13  6  5
       2  0 12  3  7
     `
+    const { id, score } = playBingo(data)
 
-    expect(playBingo(data).score).toBe(4512)
+    expect(id).toBe(3)
+    expect(score).toBe(4512)
   })
 
   it('should answer puzzle', () => {
     const data = getInput('day-4')
+    const { id, score } = playBingo(data)
 
-    expect(playBingo(data)).toMatchInlineSnapshot(`
-      Object {
-        "score": 87456,
-        "winner": 41,
-      }
-    `)
+    expect(id).toMatchInlineSnapshot(`41`)
+    expect(score).toMatchInlineSnapshot(`87456`)
   })
 
   describe('Part 2', () => {
     it('should answer example', () => {
       const data = `
-      7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
+        7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 
-      22 13 17 11  0
-      8  2 23  4 24
-      21  9 14 16  7
-      6 10  3 18  5
-      1 12 20 15 19
+        22 13 17 11  0
+        8  2 23  4 24
+        21  9 14 16  7
+        6 10  3 18  5
+        1 12 20 15 19
 
-      3 15  0  2 22
-      9 18 13 17  5
-      19  8  7 25 23
-      20 11 10 24  4
-      14 21 16 12  6
+        3 15  0  2 22
+        9 18 13 17  5
+        19  8  7 25 23
+        20 11 10 24  4
+        14 21 16 12  6
 
-      14 21 17 24  4
-      10 16 15  9 19
-      18  8 23 26 20
-      22 11 13  6  5
-      2  0 12  3  7
-    `
+        14 21 17 24  4
+        10 16 15  9 19
+        18  8 23 26 20
+        22 11 13  6  5
+        2  0 12  3  7
+      `
+      const [{ id, score }] = playInvertedBingo(data)
 
-      expect(playLosingBingo(data)).toMatchInlineSnapshot(`
-        Object {
-          "score": 1924,
-          "winner": 2,
-        }
-      `)
+      expect(id).toBe(2)
+      expect(score).toBe(1924)
     })
 
     it('should answer puzzle', () => {
       const data = getInput('day-4')
+      const [{ id, score }] = playInvertedBingo(data)
 
-      expect(playLosingBingo(data)).toMatchInlineSnapshot(`
-        Object {
-          "score": 15561,
-          "winner": 85,
-        }
-      `)
+      expect(id).toMatchInlineSnapshot(`85`)
+      expect(score).toMatchInlineSnapshot(`15561`)
     })
   })
 })

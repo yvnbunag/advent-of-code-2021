@@ -1,25 +1,14 @@
-import { parseInputToList } from '~/puzzle/utils'
+import { parseInputToList, not } from '~/puzzle/utils'
 
 export type Cell = { value: number, called: boolean }
-
 type Row = [Cell, Cell, Cell, Cell, Cell]
-
 export type Board = [Row, Row, Row, Row, Row]
+type Game = { sequence: Array<number>, boards: Array<Board> }
+type Winner = { id: number, score: number }
 
-type Second = void
+import type { Predicate } from '~/puzzle/utils'
 
-// @TODO create generator
-const emptyBoard = [[], [], [], [] ,[]]
-
-function not<
-  Predicate extends (...args: Array<any>)=> boolean,
->(predicate: Predicate): Predicate {
-  // @ts-expect-error @TODO correct type
-  return (...args) => !predicate(...args)
-}
-function cellIsCalled(cell: Cell) {
-  return cell.called
-}
+const cellIsCalled: Predicate = (cell: Cell) => cell.called
 
 export function calculateScore(board: Board, winningCall: number): number {
   return winningCall * board
@@ -38,36 +27,24 @@ function hasWonHorizontally(board: Board): boolean {
 }
 
 function hasWonVertically(board: Board): boolean {
-  const flippedBoard = board
-    // @ts-expect-error @TODO correct type
-    .reduce((accumulatedBoard, row) => {
-      const nextBoard = [...accumulatedBoard]
-
-      return nextBoard.map((column, index) => {
-        return [...column, row[index]]
-      })
-    }, emptyBoard) as unknown as Board // @TODO correct
+  const emptyBoard = [[], [], [], [] ,[]] as unknown as Board
+  const flippedBoard = board.reduce((accumulatedBoard, row) => {
+    return [...accumulatedBoard].map(
+      (column, index) => [...column, row[index]] as unknown as Row,
+    ) as Board
+  }, emptyBoard)
 
   return hasWonHorizontally(flippedBoard)
 }
 
 export function markBoard(board: Board, call: number): Board {
-  // @TODO
-  const markedBoard = [
-    [...board[0]],
-    [...board[1]],
-    [...board[2]],
-    [...board[3]],
-    [...board[4]],
-  ]
+  return board.map((row) => {
+    return row.map((cell) => {
+      if (cell.value !== call) return cell
 
-  markedBoard.forEach((row) => {
-    row.forEach((cell) => {
-      if (cell.value === call) cell.called = true
+      return { ...cell, called: true }
     })
-  })
-
-  return markedBoard as Board
+  }) as Board
 }
 
 function extractBoards(rawBoards: Array<string>): Array<Board> {
@@ -85,12 +62,7 @@ function extractBoards(rawBoards: Array<string>): Array<Board> {
   return [firstBoard, ...extractBoards(nextRawBoards)]
 }
 
-type Game = {
-  sequence: Array<number>,
-  boards: Array<Board>,
-}
-
-export function parseGame(data: string): Game {
+function parseGame(data: string): Game {
   const [rawSequence, ...rawBoards] = parseInputToList(data)
   const sequence = rawSequence.split(',').map(Number)
   const boards = extractBoards(rawBoards)
@@ -101,7 +73,46 @@ export function parseGame(data: string): Game {
   }
 }
 
-export function playBingo(data: string) {
+function duplicateBoard(board: Board): Board {
+  return board.map((row) => row.map((cell) => cell)) as Board
+}
+
+const {
+  injectBoardIndex,
+  extractBoardIndex,
+} = (() => {
+  const boardIndexKey = Symbol('board-index-key')
+
+  type IndexedBoard = Board & { [key in typeof boardIndexKey]: number }
+
+  function isIndexedBoard(board: Board | IndexedBoard): board is IndexedBoard {
+    return boardIndexKey in board
+  }
+
+  function injectBoardIndex(board: Board, value: number): IndexedBoard {
+    const injectedBoard = duplicateBoard(board)
+
+    Object.defineProperty(injectedBoard, boardIndexKey, {
+      enumerable : false,
+      value,
+    })
+
+    return injectedBoard as IndexedBoard
+  }
+
+  function extractBoardIndex(board: Board | IndexedBoard): number {
+    if (isIndexedBoard(board)) return board[boardIndexKey]
+
+    return -1
+  }
+
+  return {
+    injectBoardIndex,
+    extractBoardIndex,
+  }
+})()
+
+export function playBingo(data: string): Winner {
   let game = parseGame(data)
   let winnerIndex = -1
   let lastCall = -1
@@ -110,60 +121,43 @@ export function playBingo(data: string) {
     const { sequence, boards } = game
     const [call, ...nextSequence] = sequence
     const nextBoards = boards.map((board) => markBoard(board, call))
+
     winnerIndex = nextBoards.findIndex((board) => hasWon(board))
     lastCall = call
     game = { sequence: nextSequence, boards: nextBoards }
   }
 
+  const id = winnerIndex + 1
   const score = calculateScore(game.boards[winnerIndex], lastCall)
 
-  return {
-    winner: winnerIndex + 1,
-    score,
-  }
+  return { id, score }
 }
 
-const boardIndexKey = Symbol('board-index-key')
-
-function injectProperty(board: Board, value: unknown) {
-  Object.defineProperty(board, boardIndexKey, {
-    enumerable : false,
-    value,
-  })
-
-  return board
-}
-
-function extractProperty(board: Board): unknown {
-  // @TODO
-  if (boardIndexKey in board) return board[boardIndexKey as any]
-
-  return undefined
-}
-
-export function playLosingBingo(data: string) {
+export function playInvertedBingo(data: string): Array<Winner> {
   let game = parseGame(data)
-  let lastWinningBoards: Array<Board> = []
+  let remainingBoards: Array<Board> = []
   let lastCall = -1
 
-  game.boards = game.boards.map((board, index) => injectProperty(board, index))
+  game.boards = game.boards
+    .map((board, index) => injectBoardIndex(board, index))
 
   while(game.boards.length) {
     const { sequence, boards } = game
     const [call, ...nextSequence] = sequence
     const nextBoards = boards.map((board) => {
-      return injectProperty(markBoard(board, call), extractProperty(board))
+      return injectBoardIndex(markBoard(board, call), extractBoardIndex(board))
     })
     const continuingBoards = nextBoards.filter((board) => !hasWon(board))
 
-    lastWinningBoards = nextBoards
+    remainingBoards = nextBoards
     lastCall = call
     game = { sequence: nextSequence, boards: continuingBoards }
   }
 
-  const [lastWinningBoard] = lastWinningBoards
-  const score = calculateScore(lastWinningBoard, lastCall)
-  const winner = Number(extractProperty(lastWinningBoard)) + 1
-
-  return { score, winner }
+  return remainingBoards.map((board) => {
+    return {
+      id: Number(extractBoardIndex(board)) + 1,
+      score: calculateScore(board, lastCall),
+    }
+  })
 }
