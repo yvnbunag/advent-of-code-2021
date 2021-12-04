@@ -100,7 +100,7 @@ const {
     return injectedBoard as IndexedBoard
   }
 
-  function extractBoardIndex(board: Board | IndexedBoard): number| undefined {
+  function extractBoardIndex(board: Board | IndexedBoard): number | undefined {
     if (isIndexedBoard(board)) return board[boardIndexKey]
 
     return undefined
@@ -137,7 +137,7 @@ export function playInvertedBingo(data: string): Array<Winner> {
     const playedBoards = game.boards.map((board, index) =>
       injectBoardIndex(
         markBoard(board, call),
-        extractBoardIndex(board) || index,
+        extractBoardIndex(board) ?? index,
       ),
     )
     const continuingBoards = playedBoards.filter(not(hasWon))
