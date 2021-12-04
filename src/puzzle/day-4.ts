@@ -18,12 +18,12 @@ export function calculateScore(board: Board, winningCall: number): number {
     .reduce((current, next) => current + next)
 }
 
-export function hasWon(board: Board): boolean {
+export const hasWon: Predicate = (board: Board): boolean => {
   return hasWonHorizontally(board) || hasWonVertically(board)
 }
 
 function hasWonHorizontally(board: Board): boolean {
-  return board.some((row) => row.filter(cellIsCalled).length === 5)
+  return board.some((row) => row.every(cellIsCalled))
 }
 
 function hasWonVertically(board: Board): boolean {
@@ -47,7 +47,7 @@ export function markBoard(board: Board, call: number): Board {
   }) as Board
 }
 
-function extractBoards(rawBoards: Array<string>): Array<Board> {
+function mapBoards(rawBoards: Array<string>): Array<Board> {
   if (!rawBoards.length) return []
 
   const firstRawBoard = rawBoards.slice(0, 5)
@@ -59,13 +59,13 @@ function extractBoards(rawBoards: Array<string>): Array<Board> {
       .map((value) => ({ value, called: false }))
   }) as unknown as Board
 
-  return [firstBoard, ...extractBoards(nextRawBoards)]
+  return [firstBoard, ...mapBoards(nextRawBoards)]
 }
 
 function parseGame(data: string): Game {
   const [rawSequence, ...rawBoards] = parseInputToList(data)
   const sequence = rawSequence.split(',').map(Number)
-  const boards = extractBoards(rawBoards)
+  const boards = mapBoards(rawBoards)
 
   return {
     sequence,
@@ -122,7 +122,7 @@ export function playBingo(data: string): Winner {
     const [call, ...nextSequence] = sequence
     const nextBoards = boards.map((board) => markBoard(board, call))
 
-    winnerIndex = nextBoards.findIndex((board) => hasWon(board))
+    winnerIndex = nextBoards.findIndex(hasWon)
     lastCall = call
     game = { sequence: nextSequence, boards: nextBoards }
   }
@@ -147,7 +147,7 @@ export function playInvertedBingo(data: string): Array<Winner> {
     const nextBoards = boards.map((board) => {
       return injectBoardIndex(markBoard(board, call), extractBoardIndex(board))
     })
-    const continuingBoards = nextBoards.filter((board) => !hasWon(board))
+    const continuingBoards = nextBoards.filter(not(hasWon))
 
     remainingBoards = nextBoards
     lastCall = call
