@@ -14,14 +14,23 @@ if [ -z "$day" ]
     exit 1
 fi
 
-targetInput="$inputsDirectory/day-$day.txt"
-targetPuzzle="$puzzleDirectory/day-$day.ts"
-targetSpec="$specsDirectory/day-$day.spec.ts"
+targetID="day-$day"
+targetInput="$inputsDirectory/$targetID.txt"
+targetPuzzle="$puzzleDirectory/$targetID.ts"
+targetSpec="$specsDirectory/$targetID.spec.ts"
 
-# @TODO prevent if files already exist
+if [[ -f $targetInput ]] && [[ -f $targetPuzzle ]] && [[ -f $targetSpec ]]
+  then
+    echo "Scaffold files for day $day existing"
+    exit 1
+fi
+
 cp -n "$inputsDirectory/template.txt" $targetInput
 scaffolded $targetInput
+
 cp -n "$puzzleDirectory/template.ts" $targetPuzzle
 scaffolded $targetPuzzle
+
 cp -n "$specsDirectory/template.spec.ts" $targetSpec
+sed -i '' "s/template/$targetID/" $targetSpec
 scaffolded $targetSpec
