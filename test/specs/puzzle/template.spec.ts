@@ -13,7 +13,7 @@ describe('Part 1 - first', () => {
   })
 
   it('should answer puzzle', () => {
-    const data = getInput('day-1')
+    const data = getInput('template')
 
     first(data)
   })
@@ -27,7 +27,7 @@ describe('Part 2 - second', () => {
   })
 
   it('should answer puzzle', () => {
-    const data = getInput('day-1')
+    const data = getInput('template')
 
     second(data)
   })
