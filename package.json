@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "eval": "ts-node -r tsconfig-paths/register",
+    "scaffold": "sh scaffold.sh",
     "test": "jest test/specs --config=jest.config.json",
     "test:watch": "jest --config=jest.config.json --watch",
     "test:focused": "jest --config=jest.config.json",
