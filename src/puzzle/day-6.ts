@@ -43,7 +43,7 @@ function add(first: number, second: number) {
   return first + second
 }
 
-export function observeLanternFish(
+export function observeLanternFishSchool(
   input: string,
   days: number,
 ): number {
