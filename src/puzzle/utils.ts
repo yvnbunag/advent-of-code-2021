@@ -1,8 +1,11 @@
 export type Predicate = (...args: Array<any>)=> boolean // eslint-disable-line @typescript-eslint/no-explicit-any
 
-export function parseInputToList(input: string): Array<string> {
+export function parseInputToList(
+  input: string,
+  delimiter = '\n',
+): Array<string> {
   return input
-    .split('\n')
+    .split(delimiter)
     .map((value) => value.trim())
     .filter(Boolean)
 }
