@@ -15,3 +15,24 @@ export function not<WrappedPredicate extends Predicate>(
 ): Predicate {
   return (...args: Array<unknown>) => !predicate(...args)
 }
+
+export function add(first: number, second: number) {
+  return first + second
+}
+
+export function subtract(first: number, second: number) {
+  return first - second
+}
+
+export function createListFromLength(length: number, start = 0) {
+  return Array(length).fill(0)
+    .map((value, index) => index + start)
+}
+
+export function createListFromRange(start: number, end: number) {
+  const distance = Math.max(start, end) - Math.min(start, end)
+
+  return Array(distance + 1)
+    .fill(null)
+    .map((value, index) => index + start)
+}

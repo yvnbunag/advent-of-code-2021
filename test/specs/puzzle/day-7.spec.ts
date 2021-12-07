@@ -48,7 +48,7 @@ describe('Part 2 - second', () => {
     expect(getLeastExponentialFuelCrabAlignment(data)).toBe(168)
   })
 
-  // Skipping because solution is brute force
+  // Skipping because solution is brute force, resulting in slow computation
   it.skip('should answer puzzle', () => {
     const data = getInput('day-7')
 
