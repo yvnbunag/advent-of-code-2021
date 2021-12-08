@@ -3,7 +3,7 @@ import { parseInputToList, operation, string, list } from '~/puzzle/utils'
 const { trim, splitBy } = string
 const { sortByLetter } = list
 
-type Display = ReadonlyArray<string>
+type Display = Array<string>
 
 type Signal = Array<Display>
 
@@ -122,7 +122,11 @@ function extractDisplay(
 }
 
 function isEquivalentSignal(first: Display, second: Display): boolean {
-  return first.join('') === second.join('')
+  const [normalizedFirst, normalizedSecond] = [first, second]
+    .map(sortByLetter)
+    .map((display) => display.join(''))
+
+  return normalizedFirst === normalizedSecond
 }
 
 function createGetDisplayValue(
@@ -163,7 +167,6 @@ function parseInputToNotes(input: string): Array<Note> {
     .map((rawNotes) => rawNotes.map(trim))
     .map((rawNotes) => rawNotes.map(splitBy(' ')))
     .map((rawNote) => rawNote.map((noteEntry) => noteEntry.map(splitBy(''))))
-    .map((rawNote) => rawNote.map((noteEntry) => noteEntry.map(sortByLetter)))
     .map(([signal, output]) => ({ signal, output }))
 }
 
