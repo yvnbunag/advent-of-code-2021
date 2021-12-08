@@ -12,7 +12,7 @@ type Note = {
   output: Signal,
 }
 
-type DisplayPredicate = (signal: Display)=> boolean
+type DisplayPredicate = (display: Display)=> boolean
 
 const correctSegments: Signal = [
   /** 0 **/ ['a', 'b', 'c', 'e', 'f', 'g'],
@@ -55,9 +55,9 @@ function isEight({ length }: Display): boolean {
 function createIsNine(
   shadows: Record<'one' | 'four' | 'seven', Display>,
 ): DisplayPredicate {
-  return (signal) => {
-    return hasEveryShadow(signal, Object.values(shadows))
-      && !isEight(signal)
+  return (display) => {
+    return hasEveryShadow(display, Object.values(shadows))
+      && !isEight(display)
   }
 }
 
@@ -65,28 +65,28 @@ function createIsZero(
   shadows: Record<'one' | 'seven', Display>,
   notPredicates: Record<'isNine', DisplayPredicate>,
 ): DisplayPredicate {
-  return (signal) => {
-    return signal.length === correctSegments[0].length
-      && hasEveryShadow(signal, Object.values(shadows))
-      && !Object.values(notPredicates).some((predicate) => predicate(signal))
+  return (display) => {
+    return display.length === correctSegments[0].length
+      && hasEveryShadow(display, Object.values(shadows))
+      && !Object.values(notPredicates).some((predicate) => predicate(display))
   }
 }
 
 function createIsSix(
   notPredicates: Record<'isNine' | 'isZero', DisplayPredicate>,
 ): DisplayPredicate {
-  return (signal) => {
-    return signal.length === correctSegments[6].length
-      && !Object.values(notPredicates).some((predicate) => predicate(signal))
+  return (display) => {
+    return display.length === correctSegments[6].length
+      && !Object.values(notPredicates).some((predicate) => predicate(display))
   }
 }
 
 function createIsThree(
   shadows: Record<'one' | 'seven', Display>,
 ): DisplayPredicate {
-  return (signal) => {
-    return signal.length === correctSegments[3].length
-      && hasEveryShadow(signal, Object.values(shadows))
+  return (display) => {
+    return display.length === correctSegments[3].length
+      && hasEveryShadow(display, Object.values(shadows))
   }
 }
 
@@ -98,19 +98,19 @@ function createIsFive(
   const { one, six } = commonDisplaySources
   const commonDisplay = one.find((value) => six.includes(value))
 
-  return (signal) => {
-    return signal.length === correctSegments[5].length
-      && signal.some((value) => value === commonDisplay)
-      && !Object.values(notPredicates).some((predicate) => predicate(signal))
+  return (display) => {
+    return display.length === correctSegments[5].length
+      && display.some((value) => value === commonDisplay)
+      && !Object.values(notPredicates).some((predicate) => predicate(display))
   }
 }
 
 function createIsTwo(
   notPredicates: Record<'isThree' | 'isFive', DisplayPredicate>,
 ): DisplayPredicate {
-  return (signal) => {
-    return signal.length === correctSegments[2].length
-      && !Object.values(notPredicates).some((predicate) => predicate(signal))
+  return (display) => {
+    return display.length === correctSegments[2].length
+      && !Object.values(notPredicates).some((predicate) => predicate(display))
   }
 }
 
