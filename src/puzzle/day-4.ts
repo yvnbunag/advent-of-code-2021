@@ -1,4 +1,4 @@
-import { parseInputToList, not } from '~/puzzle/utils'
+import { parseInputToList, not } from '~/puzzle/utils/version-1'
 
 export type Cell = { value: number, called: boolean }
 type Row = [Cell, Cell, Cell, Cell, Cell]
@@ -6,7 +6,7 @@ export type Board = [Row, Row, Row, Row, Row]
 type Game = { sequence: Array<number>, boards: Array<Board> }
 type Winner = { id: number, score: number }
 
-import type { Predicate } from '~/puzzle/utils'
+import type { Predicate } from '~/puzzle/utils/version-1'
 
 const cellIsCalled: Predicate = (cell: Cell) => cell.called
 

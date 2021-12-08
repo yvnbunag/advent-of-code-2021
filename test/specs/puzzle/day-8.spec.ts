@@ -1,9 +1,5 @@
-import { first, second } from '~/puzzle/day-8'
+import { inferOccurrences, inferOutputTotal } from '~/puzzle/day-8'
 import { getInput } from '~/inputs'
-
-describe('Methods', () => {
-  /** Methods */
-})
 
 describe('Part 1 - first', () => {
   it('should answer example', () => {
@@ -20,18 +16,18 @@ describe('Part 1 - first', () => {
       gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
     `
 
-    expect(first(data)).toBe(26)
+    expect(inferOccurrences(data, [1, 7, 4, 8])).toBe(26)
   })
 
   it('should answer puzzle', () => {
     const data = getInput('day-8')
 
-    expect(first(data)).toMatchInlineSnapshot(`392`)
+    expect(inferOccurrences(data, [1, 7, 4, 8])).toMatchInlineSnapshot(`392`)
   })
 })
 
 describe('Part 2 - second', () => {
-  it.only('should answer example', () => {
+  it('should answer example', () => {
     const data = `
       be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
       edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc
@@ -45,12 +41,12 @@ describe('Part 2 - second', () => {
       gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
     `
 
-    expect(second(data)).toBe(61229)
+    expect(inferOutputTotal(data)).toBe(61229)
   })
 
-  it.only('should answer puzzle', () => {
+  it('should answer puzzle', () => {
     const data = getInput('day-8')
 
-    expect(second(data)).toBe(0)
+    expect(inferOutputTotal(data)).toMatchInlineSnapshot(`1004688`)
   })
 })

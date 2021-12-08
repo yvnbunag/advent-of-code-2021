@@ -1,4 +1,4 @@
-import { parseInputToList } from '~/puzzle/utils'
+import { parseInputToList } from '~/puzzle/utils/version-1'
 
 type Point = `${string},${string}`
 

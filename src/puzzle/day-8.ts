@@ -1,28 +1,20 @@
-/* eslint-disable max-len */
-import { parseInputToList, add } from '~/puzzle/utils'
+import { parseInputToList, operation, string, list } from '~/puzzle/utils'
+
+const { trim, splitBy } = string
+const { sortByLetter } = list
+
+type Display = ReadonlyArray<string>
+
+type Signal = Array<Display>
 
 type Note = {
-  signals: Array<Array<string>>,
-  output: Array<Array<string>>,
+  signal: Signal,
+  output: Signal,
 }
 
-function splitBy(delimiter: string) {
-  return (value: string) => value.split(delimiter)
-}
+type DisplayPredicate = (signal: Display)=> boolean
 
-function trim(value: string): string {
-  return value.trim()
-}
-
-function sortByLetter(list: Array<string>): Array<string> {
-  function sort(first: string, second: string) {
-    return first.toLowerCase().localeCompare(second.toLowerCase())
-  }
-
-  return list.sort(sort)
-}
-
-const segments: Note['signals'] = [
+const correctSegments: Signal = [
   /** 0 **/ ['a', 'b', 'c', 'e', 'f', 'g'],
   /** 1 **/ ['c', 'f'],
   /** 2 **/ ['a', 'c', 'd', 'e', 'g'],
@@ -35,184 +27,183 @@ const segments: Note['signals'] = [
   /** 9 **/ ['a', 'b', 'c', 'd', 'f', 'g'],
 ]
 
-function isOne(signal: Note['signals'][number]): boolean {
-  return signal.length === segments[1].length
-}
-
-function isSeven(signal: Note['signals'][number]): boolean {
-  return signal.length === segments[7].length
-}
-
-function isFour(signal: Note['signals'][number]): boolean {
-  return signal.length === segments[4].length
-}
-
-function isEight(signal: Note['signals'][number]): boolean {
-  return signal.length === segments[8].length
-}
-
-function isEquivalentSignal(
-  first: Array<string>,
-  second: Array<string>,
-): boolean {
-  return first.join('') === second.join('')
-}
-
-export function first(input: string) {
-  const data: Array<Note> = parseInputToList(input, '\n')
-    .map(splitBy('|'))
-    .map((rawNotes) => rawNotes.map(trim))
-    .map((rawNotes) => rawNotes.map(splitBy(' ')))
-    .map(([rawSignals, rawOutput]) => [rawSignals.map(splitBy('')), rawOutput.map(splitBy(''))])
-    .map(([signals, output]) => [signals.map(sortByLetter), output.map(sortByLetter)])
-    .map(([signals, output]) => ({ signals, output }))
-
-  let count = 0
-
-  data.forEach((note) => {
-    const one = note.signals[note.signals.findIndex(isOne)]
-    const seven = note.signals[note.signals.findIndex(isSeven)]
-    const four = note.signals[note.signals.findIndex(isFour)]
-    const eight = note.signals[note.signals.findIndex(isEight)]
-
-    note.output.forEach((value) => {
-      if (isEquivalentSignal(value, one)) count = count + 1
-      if (isEquivalentSignal(value, seven)) count = count + 1
-      if (isEquivalentSignal(value, four)) count = count + 1
-      if (isEquivalentSignal(value, eight)) count = count + 1
-    })
+function hasEveryShadow(display: Display, shadows: Array<Display>): boolean {
+  return Object.values(shadows).every((shadow) => {
+    return shadow.every(
+      (shadowValue) => display
+        .some((displayValue) => displayValue.includes(shadowValue)),
+    )
   })
+}
 
-  return count
+function isOne({ length }: Display): boolean {
+  return length === correctSegments[1].length
+}
+
+function isSeven({ length }: Display): boolean {
+  return length === correctSegments[7].length
+}
+
+function isFour({ length }: Display): boolean {
+  return length === correctSegments[4].length
+}
+
+function isEight({ length }: Display): boolean {
+  return length === correctSegments[8].length
 }
 
 function createIsNine(
-  equivalents: Record<'one' | 'four' | 'seven', Note['signals'][number]>,
-) {
-  const equivalentsList = Object.values(equivalents)
-
-  return (signal: Note['signals'][number]): boolean => {
-    return equivalentsList.every((equivalent) => {
-      return equivalent.every((eq) => signal.some((value) => value.includes(eq)))
-        && !isEight(signal)
-    })
+  shadows: Record<'one' | 'four' | 'seven', Display>,
+): DisplayPredicate {
+  return (signal) => {
+    return hasEveryShadow(signal, Object.values(shadows))
+      && !isEight(signal)
   }
 }
 
 function createIsZero(
-  equivalents: Record<'one' | 'seven', Note['signals'][number]>,
-  isNine: ReturnType<typeof createIsNine>,
-) {
-  const equivalentsList = Object.values(equivalents)
-
-  return (signal: Note['signals'][number]): boolean => {
-    return equivalentsList.every((equivalent) => {
-      return equivalent.every((eq) => signal.some((value) => value.includes(eq)))
-        && !isEight(signal)
-    }) && !isNine(signal) && signal.length === segments[0].length
+  shadows: Record<'one' | 'seven', Display>,
+  notPredicates: Record<'isNine', DisplayPredicate>,
+): DisplayPredicate {
+  return (signal) => {
+    return signal.length === correctSegments[0].length
+      && hasEveryShadow(signal, Object.values(shadows))
+      && !Object.values(notPredicates).some((predicate) => predicate(signal))
   }
 }
 
 function createIsSix(
-  isZero: ReturnType<typeof createIsZero>,
-  isNine: ReturnType<typeof createIsNine>,
-) {
-  return (signal: Note['signals'][number]): boolean => {
-    return signal.length === segments[6].length
-      && !isZero(signal)
-      && !isNine(signal)
+  notPredicates: Record<'isNine' | 'isZero', DisplayPredicate>,
+): DisplayPredicate {
+  return (signal) => {
+    return signal.length === correctSegments[6].length
+      && !Object.values(notPredicates).some((predicate) => predicate(signal))
   }
 }
 
 function createIsThree(
-  equivalents: Record<'one' | 'seven', Note['signals'][number]>,
-) {
-  const equivalentsList = Object.values(equivalents)
-
-  return (signal: Note['signals'][number]): boolean => {
-    return equivalentsList.every((equivalent) => {
-      return equivalent.every((eq) => signal.some((value) => value.includes(eq)))
-        && signal.length === segments[3].length
-    })
-  }
-}
-
-function createIsTwo(
-  isThree: ReturnType<typeof createIsThree>,
-  isFive: ReturnType<typeof createIsFive>,
-) {
-  return (signal: Note['signals'][number]): boolean => {
-    return signal.length === segments[2].length
-      && !isThree(signal)
-      && !isFive(signal)
+  shadows: Record<'one' | 'seven', Display>,
+): DisplayPredicate {
+  return (signal) => {
+    return signal.length === correctSegments[3].length
+      && hasEveryShadow(signal, Object.values(shadows))
   }
 }
 
 function createIsFive(
-  commons: Record<'one' | 'six', Note['signals'][number]>,
-  isThree: ReturnType<typeof createIsThree>,
-) {
-  const { six, one } = commons
-  const commonF = one.find((value) => six.includes(value))
+  commonDisplaySources: Record<'one' | 'six', Display>,
+  notPredicates: Record<'isThree', DisplayPredicate>,
+): DisplayPredicate {
+  // Intersect 1 and 6 to get common display with 5
+  const { one, six } = commonDisplaySources
+  const commonDisplay = one.find((value) => six.includes(value))
 
-  return (signal: Note['signals'][number]): boolean => {
-    return signal.some((value) => value === commonF)
-      && signal.length === segments[5].length
-      && !isThree(signal)
+  return (signal) => {
+    return signal.length === correctSegments[5].length
+      && signal.some((value) => value === commonDisplay)
+      && !Object.values(notPredicates).some((predicate) => predicate(signal))
   }
 }
 
-export function second(input: string) {
-  const data: Array<Note> = parseInputToList(input, '\n')
+function createIsTwo(
+  notPredicates: Record<'isThree' | 'isFive', DisplayPredicate>,
+): DisplayPredicate {
+  return (signal) => {
+    return signal.length === correctSegments[2].length
+      && !Object.values(notPredicates).some((predicate) => predicate(signal))
+  }
+}
+
+function extractDisplay(
+  signal: Signal,
+  condition: (display: Display)=> boolean,
+): Display {
+  return signal[signal.findIndex(condition)]
+}
+
+function isEquivalentSignal(first: Display, second: Display): boolean {
+  return first.join('') === second.join('')
+}
+
+function createGetDisplayValue(
+  signal: Signal,
+): (display: Display)=> number {
+  const one = extractDisplay(signal, isOne)
+  const seven = extractDisplay(signal, isSeven)
+  const four = extractDisplay(signal, isFour)
+  const eight = extractDisplay(signal, isEight)
+
+  const isNine = createIsNine({ one, four, seven })
+  const nine = extractDisplay(signal, isNine)
+
+  const isZero = createIsZero({ one, seven }, { isNine })
+  const zero = extractDisplay(signal, isZero)
+
+  const isSix = createIsSix({ isZero, isNine })
+  const six = extractDisplay(signal, isSix)
+
+  const isThree = createIsThree({ one, seven })
+  const three = extractDisplay(signal, isThree)
+
+  const isFive = createIsFive({ one, six }, { isThree })
+  const five = extractDisplay(signal, isFive)
+
+  const isTwo = createIsTwo({ isThree, isFive })
+  const two = extractDisplay(signal, isTwo)
+
+  const segments = [zero, one, two, three, four, five, six, seven, eight, nine]
+
+  return (display) => segments
+    .findIndex((segment) => isEquivalentSignal(segment, display))
+}
+
+function parseInputToNotes(input: string): Array<Note> {
+  return parseInputToList(input, '\n')
     .map(splitBy('|'))
     .map((rawNotes) => rawNotes.map(trim))
     .map((rawNotes) => rawNotes.map(splitBy(' ')))
-    .map(([rawSignals, rawOutput]) => [rawSignals.map(splitBy('')), rawOutput.map(splitBy(''))])
-    .map(([signals, output]) => [signals.map(sortByLetter), output.map(sortByLetter)])
-    .map(([signals, output]) => ({ signals, output }))
+    .map((rawNote) => rawNote.map((noteEntry) => noteEntry.map(splitBy(''))))
+    .map((rawNote) => rawNote.map((noteEntry) => noteEntry.map(sortByLetter)))
+    .map(([signal, output]) => ({ signal, output }))
+}
 
-  const values = data.map((note) => {
-    const one = note.signals[note.signals.findIndex(isOne)]
-    const seven = note.signals[note.signals.findIndex(isSeven)]
-    const four = note.signals[note.signals.findIndex(isFour)]
-    const eight = note.signals[note.signals.findIndex(isEight)]
+function createToOutputOccurrences(
+  getDisplayValue: ReturnType<typeof createGetDisplayValue>,
+  values: Array<number>,
+) {
+  return (occurrences: number, display: Display) => {
+    const displayOccurrences = values
+      .filter((value) => getDisplayValue(display) === value)
+      .length
 
-    const isNine = createIsNine({ one, four, seven })
-    const nine = note.signals[note.signals.findIndex(isNine)]
+    return occurrences + displayOccurrences
+  }
+}
 
-    const isZero = createIsZero({ one, seven }, isNine)
-    const zero = note.signals[note.signals.findIndex(isZero)]
+function createToNoteOccurrences(values: Array<number>) {
+  return (occurrences: number, { signal, output }: Note) => {
+    const getDisplayValue = createGetDisplayValue(signal)
+    const outputOccurrences = output
+      .reduce(createToOutputOccurrences(getDisplayValue, values), 0)
 
-    const isSix = createIsSix(isZero, isNine)
-    const six = note.signals[note.signals.findIndex(isSix)]
+    return occurrences + outputOccurrences
+  }
+}
 
-    const isThree = createIsThree({ one, seven })
-    const three = note.signals[note.signals.findIndex(isThree)]
+export function inferOccurrences(input: string, values: Array<number>) {
+  const notes = parseInputToNotes(input)
 
-    const isFive = createIsFive({ one, six }, isThree)
-    const five = note.signals[note.signals.findIndex(isFive)]
+  return notes.reduce(createToNoteOccurrences(values), 0)
+}
 
-    const isTwo = createIsTwo(isThree, isFive)
-    const two = note.signals[note.signals.findIndex(isTwo)]
-    const equivalents = [
-      zero,
-      one,
-      two,
-      three,
-      four,
-      five,
-      six,
-      seven,
-      eight,
-      nine,
-    ]
-
-    const outputValue = note.output.map((value) => {
-      return equivalents.findIndex((equivalent) => isEquivalentSignal(equivalent, value))
-    })
+export function inferOutputTotal(input: string) {
+  const notes = parseInputToNotes(input)
+  const values = notes.map(({ signal, output }) => {
+    const getDisplayValue = createGetDisplayValue(signal)
+    const outputValue = output.map(getDisplayValue)
 
     return Number(outputValue.join(''))
   })
 
-  return values.reduce(add, 0)
+  return values.reduce(operation.add, 0)
 }

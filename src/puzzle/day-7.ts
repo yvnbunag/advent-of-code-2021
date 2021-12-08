@@ -4,7 +4,7 @@ import {
   subtract,
   createListFromRange,
   createListFromLength,
-} from '~/puzzle/utils'
+} from '~/puzzle/utils/version-1'
 
 function parseCrabPositionsToList(input: string): Array<number> {
   return parseInputToList(input, ',').map(Number)
