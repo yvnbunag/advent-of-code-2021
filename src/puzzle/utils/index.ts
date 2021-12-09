@@ -6,6 +6,7 @@ export * as predicate from '~/puzzle/utils/predicate'
 export * as number from '~/puzzle/utils/number'
 export * as list from '~/puzzle/utils/list'
 export * as string from '~/puzzle/utils/string'
+export * as object from '~/puzzle/utils/object'
 
 export function parseInputToList(
   input: string,

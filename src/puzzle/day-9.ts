@@ -1,8 +1,8 @@
-import { parseInputToList, string, number, predicate } from '~/puzzle/utils'
-
-const { trim } = string
-const { not } = predicate
-
+import { parseInputToList } from '~/puzzle/utils'
+import { trim } from '~/puzzle/utils/string'
+import { not } from '~/puzzle/utils/predicate'
+import { omit } from '~/puzzle/utils/object'
+import { add, subtract, multiply } from '~/puzzle/utils/number'
 type Column = number
 
 type Row = Array<Column>
@@ -15,8 +15,8 @@ type ColumnData = {
   value: Column,
 }
 
-type AdjacentColumns = {
-  value: ColumnData,
+type AdjacentColumnData = {
+  target: ColumnData,
   top?: ColumnData,
   bottom?: ColumnData,
   left?: ColumnData,
@@ -26,7 +26,7 @@ type AdjacentColumns = {
 function getAdjacentColumns(
   target: Pick<ColumnData, 'rowIndex' | 'columnIndex'>,
   map: HeightMap,
-): AdjacentColumns {
+): AdjacentColumnData {
   const value: ColumnData = {
     value: map[target.rowIndex][target.columnIndex],
     ...target,
@@ -67,30 +67,27 @@ function getAdjacentColumns(
 
     return { value, rowIndex, columnIndex }
   })()
-
   const adjacent = [
-    ['value', value],
-    ...[
-      ['above', above],
-      ['below', below],
-      ['left', left],
-      ['right', right],
-    ].filter(([, value ]) => value !== null),
-  ]
+    ['above', above],
+    ['below', below],
+    ['left', left],
+    ['right', right],
+  ].filter(([, value]) => value !== null)
+  const data = [['target', value], ...adjacent]
 
-  return Object.fromEntries(adjacent)
+  return Object.fromEntries(data)
 }
 
-function createColumnDataVisitedCache() {
+function createColumnVisitLogger() {
   const storage: Array<Array<boolean>> = []
 
-  function isCached(columnData: ColumnData): boolean {
+  function isVisited(columnData: ColumnData): boolean {
     const { rowIndex, columnIndex } = columnData
 
     return storage?.[rowIndex]?.[columnIndex] || false
   }
 
-  function cache(columnData: ColumnData): boolean {
+  function logVisit(columnData: ColumnData): boolean {
     const { rowIndex, columnIndex } = columnData
 
     if (!Array.isArray(storage[rowIndex])) storage[rowIndex] = []
@@ -100,88 +97,86 @@ function createColumnDataVisitedCache() {
     return storage[rowIndex][columnIndex]
   }
 
-  return { isCached, cache }
+  return { isVisited, logVisit }
 }
 
 function calculateBasinSize(
-  data: AdjacentColumns,
+  adjacentColumnData: AdjacentColumnData,
   map: HeightMap,
-  cache: ReturnType<typeof createColumnDataVisitedCache>,
+  visitLogger: ReturnType<typeof createColumnVisitLogger>,
 ): number {
-  const { value: current, ...adjacent } = data
+  const { target, ...adjacent } = adjacentColumnData
 
-  if (cache.isCached(current)) return 0
-  if (current.value === 9) return 0
+  if (target.value === 9) return 0
+  if (visitLogger.isVisited(target)) return 0
 
-  cache.cache(current)
+  visitLogger.logVisit(target)
 
   const basinNeighbors: Array<ColumnData> = Object.values(adjacent)
     .filter(Boolean)
-    .filter(not(cache.isCached))
+    .filter(not(visitLogger.isVisited))
   const basinNeighborsCount = basinNeighbors
-    .map((columnData) => {
-      return calculateBasinSize(getAdjacentColumns(columnData, map), map, cache)
-    })
-    .reduce(number.add, 0)
+    .map((columnData) => calculateBasinSize(
+      getAdjacentColumns(columnData, map),
+      map,
+      visitLogger,
+    ))
+    .reduce(add, 0)
 
   return 1 + basinNeighborsCount
 }
 
 function parseInputToHeightMap(input: string): HeightMap {
   return parseInputToList(input)
-    .map((row) => row.split('').map(trim)
-      .map(Number))
+    .map((row) => {
+      return row.split('')
+        .map(trim)
+        .map(Number)
+    })
 }
 
 export function sumLowPoints(input: string): number {
   const map = parseInputToHeightMap(input)
-  const lowPoints: Array<number> = []
+  const lowPoints: Array<number> = map.reduce((accLowPoints, row, rowIndex) => {
+    const rowLowPoints = row.reduce((accRowLowPoints, column, columnIndex) => {
+      const adjacentData = getAdjacentColumns({ rowIndex, columnIndex }, map)
+      const adjacent = omit(adjacentData, ['target'])
+      const isLowPoint = Object
+        .values(adjacent)
+        .every((adjacentValue) => adjacentValue.value > column)
 
-  for (const rowIndex of map.keys()) {
-    for (const columnIndex of map[rowIndex].keys()) {
-      const {
-        value,
-        ...adjacent
-      } = getAdjacentColumns({ rowIndex, columnIndex }, map)
-      const isLowPoint = Object.values(adjacent)
-        .every((adjacentValue) => adjacentValue.value > value.value)
+      if (isLowPoint) return [...accRowLowPoints, column]
 
-      if (isLowPoint) {
-        lowPoints.push(value.value)
-      }
-    }
-  }
+      return accRowLowPoints
+    }, [] as Array<number>)
+
+    return [...accLowPoints, ...rowLowPoints]
+  }, [] as Array<number>)
 
   return lowPoints
     .map((lowPoint) => lowPoint + 1)
-    .reduce(number.add, 0)
+    .reduce(add, 0)
 }
 
 export function multiplyLargestBasins(input: string): number {
   const map = parseInputToHeightMap(input)
-  const basins: Array<number> = []
-  const basinCache = createColumnDataVisitedCache()
+  const visitLogger = createColumnVisitLogger()
+  const basinSizes = map.reduce((accBasinSizes, row, rowIndex) => {
+    const rowBasinSizes = row.reduce((rowBasinSizes, column, columnIndex) => {
+      const adjacentData = getAdjacentColumns({ rowIndex, columnIndex }, map)
 
-  for (const rowIndex of map.keys()) {
-    for (const columnIndex of map[rowIndex].keys()) {
-      const columnData = getAdjacentColumns({ rowIndex, columnIndex }, map)
+      if (visitLogger.isVisited(adjacentData.target)) return rowBasinSizes
 
-      if (basinCache.isCached(columnData.value)) continue
+      const size = calculateBasinSize(adjacentData, map, visitLogger)
 
-      if (columnData.value.value === 9) {
-        basinCache.cache(columnData.value)
+      return [...rowBasinSizes, size]
+    }, [] as Array<number>)
 
-        continue
-      }
+    return [...accBasinSizes, ...rowBasinSizes]
+  }, [] as Array<number>)
 
-      const size = calculateBasinSize(columnData, map, basinCache)
-
-      basins.push(size)
-    }
-  }
-
-  return basins
-    .sort(number.subtract)
+  return basinSizes
+    .sort(subtract)
     .slice(-3)
-    .reduce(number.multiply, 1)
+    .reduce(multiply, 1)
 }
