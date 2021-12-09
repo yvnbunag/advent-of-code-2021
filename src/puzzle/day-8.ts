@@ -1,4 +1,4 @@
-import { parseInputToList, operation, string, list } from '~/puzzle/utils'
+import { parseInputToList, number, string, list } from '~/puzzle/utils'
 
 const { trim, splitBy } = string
 const { sortByLetter } = list
@@ -208,5 +208,5 @@ export function inferOutputTotal(input: string) {
     return Number(outputValue.join(''))
   })
 
-  return values.reduce(operation.add, 0)
+  return values.reduce(number.add, 0)
 }

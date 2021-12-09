@@ -1,9 +1,9 @@
 export * from '~/puzzle/utils/predicate'
-export * from '~/puzzle/utils/operation'
+export * from '~/puzzle/utils/number'
 export * from '~/puzzle/utils/list'
 
 export * as predicate from '~/puzzle/utils/predicate'
-export * as operation from '~/puzzle/utils/operation'
+export * as number from '~/puzzle/utils/number'
 export * as list from '~/puzzle/utils/list'
 export * as string from '~/puzzle/utils/string'
 

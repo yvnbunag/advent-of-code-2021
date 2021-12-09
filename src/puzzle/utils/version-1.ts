@@ -1,5 +1,5 @@
 export * from '~/puzzle/utils/predicate'
-export * from '~/puzzle/utils/operation'
+export * from '~/puzzle/utils/number'
 export { parseInputToList } from '~/puzzle/utils'
 export {
   createFromLength as createListFromLength,
