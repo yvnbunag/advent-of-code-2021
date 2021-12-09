@@ -35,7 +35,6 @@ function getColumnData(
     rowIndex,
     columnIndex,
   }
-
 }
 
 function getAdjacentColumns(
@@ -156,9 +155,6 @@ export function multiplyLargestBasins(input: string): number {
   const basinSizes = map.reduce((accBasinSizes, row, rowIndex) => {
     const rowBasinSizes = row.reduce((rowBasinSizes, column, columnIndex) => {
       const adjacentData = getAdjacentColumns({ rowIndex, columnIndex }, map)
-
-      if (visitLogger.isVisited(adjacentData.target)) return rowBasinSizes
-
       const size = calculateBasinSize(adjacentData, map, visitLogger)
 
       return [...rowBasinSizes, size]
