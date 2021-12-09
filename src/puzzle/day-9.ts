@@ -1,8 +1,8 @@
 import { parseInputToList } from '~/puzzle/utils'
 import { trim } from '~/puzzle/utils/string'
 import { not } from '~/puzzle/utils/predicate'
-import { omit } from '~/puzzle/utils/object'
 import { add, subtract, multiply } from '~/puzzle/utils/number'
+
 type Column = number
 
 type Row = Array<Column>
@@ -23,57 +23,49 @@ type AdjacentColumnData = {
   right?: ColumnData,
 }
 
+const PEAK_HEIGHT = 9
+
+function getColumnData(
+  map: HeightMap,
+  rowIndex: number,
+  columnIndex: number,
+): ColumnData {
+  return {
+    value: map[rowIndex][columnIndex],
+    rowIndex,
+    columnIndex,
+  }
+
+}
+
 function getAdjacentColumns(
   target: Pick<ColumnData, 'rowIndex' | 'columnIndex'>,
   map: HeightMap,
 ): AdjacentColumnData {
-  const value: ColumnData = {
-    value: map[target.rowIndex][target.columnIndex],
-    ...target,
-  }
-  const above: ColumnData | null = (() => {
-    if (target.rowIndex <= 0) return null
-
-    const rowIndex = target.rowIndex - 1
-    const columnIndex = target.columnIndex
-    const value = map[rowIndex][columnIndex]
-
-    return { value, rowIndex, columnIndex }
-  })()
-  const below: ColumnData | null = (() => {
-    if (map.length <= target.rowIndex + 1) return null
-
-    const rowIndex = target.rowIndex + 1
-    const columnIndex = target.columnIndex
-    const value = map[rowIndex][columnIndex]
-
-    return { value, rowIndex, columnIndex }
-  })()
-  const left: ColumnData | null = (() => {
-    if (target.columnIndex <= 0) return null
-
-    const rowIndex = target.rowIndex
-    const columnIndex = target.columnIndex - 1
-    const value = map[rowIndex][columnIndex]
-
-    return { value, rowIndex, columnIndex }
-  })()
-  const right: ColumnData | null = (() => {
-    if (map[target.rowIndex].length <= target.columnIndex + 1) return null
-
-    const rowIndex = target.rowIndex
-    const columnIndex = target.columnIndex + 1
-    const value = map[rowIndex][columnIndex]
-
-    return { value, rowIndex, columnIndex }
-  })()
+  const targetColumnData = getColumnData(
+    map,
+    target.rowIndex,
+    target.columnIndex,
+  )
+  const above = target.rowIndex > 0
+    ? getColumnData(map, target.rowIndex - 1, target.columnIndex)
+    : null
+  const below = map.length > target.rowIndex + 1
+    ? getColumnData(map, target.rowIndex + 1, target.columnIndex)
+    : null
+  const left = target.columnIndex > 0
+    ? getColumnData(map, target.rowIndex, target.columnIndex - 1)
+    : null
+  const right = map[target.rowIndex].length > target.columnIndex + 1
+    ? getColumnData(map, target.rowIndex, target.columnIndex + 1)
+    : null
   const adjacent = [
     ['above', above],
     ['below', below],
     ['left', left],
     ['right', right],
-  ].filter(([, value]) => value !== null)
-  const data = [['target', value], ...adjacent]
+  ].filter(([, columnData]) => columnData !== null)
+  const data = [['target', targetColumnData], ...adjacent]
 
   return Object.fromEntries(data)
 }
@@ -107,7 +99,7 @@ function calculateBasinSize(
 ): number {
   const { target, ...adjacent } = adjacentColumnData
 
-  if (target.value === 9) return 0
+  if (target.value === PEAK_HEIGHT) return 0
   if (visitLogger.isVisited(target)) return 0
 
   visitLogger.logVisit(target)
@@ -140,12 +132,12 @@ export function sumLowPoints(input: string): number {
   const lowPoints: Array<number> = map.reduce((accLowPoints, row, rowIndex) => {
     const rowLowPoints = row.reduce((accRowLowPoints, column, columnIndex) => {
       const adjacentData = getAdjacentColumns({ rowIndex, columnIndex }, map)
-      const adjacent = omit(adjacentData, ['target'])
+      const { target, ...adjacent } = adjacentData
       const isLowPoint = Object
         .values(adjacent)
-        .every((adjacentValue) => adjacentValue.value > column)
+        .every((adjacentValue) => adjacentValue.value > target.value)
 
-      if (isLowPoint) return [...accRowLowPoints, column]
+      if (isLowPoint) return [...accRowLowPoints, target.value]
 
       return accRowLowPoints
     }, [] as Array<number>)
