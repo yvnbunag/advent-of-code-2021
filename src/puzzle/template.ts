@@ -1,5 +1,7 @@
 import { parseInputToList } from '~/puzzle/utils'
 
+// @TODO remove return types
+
 type First = unknown
 
 type Second = unknown

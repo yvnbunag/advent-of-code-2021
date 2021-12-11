@@ -14,8 +14,8 @@ type Flash = {
 type PeakFlash = Flash & { isPeak: true }
 
 class Octopus {
-  static PEAK_ENERGY = 9
   static LOW_ENERGY = 0
+  static PEAK_ENERGY = 9
 
   readonly position: Position
 
@@ -68,9 +68,7 @@ type OctopusRow = Array<Octopus>
 type OctopusMatrix = Array<OctopusRow>
 
 function toOctopusMatrix(row: Array<number>, y: number): OctopusRow {
-  return row.map((energy: number, x: number) => {
-    return new Octopus(y, x, energy)
-  })
+  return row.map((energy: number, x: number) => new Octopus(y, x, energy))
 }
 
 function parseToOctopusMatrix(input: string): OctopusMatrix {
@@ -79,7 +77,7 @@ function parseToOctopusMatrix(input: string): OctopusMatrix {
     .map(toOctopusMatrix)
 }
 
-function getOctopusFromMatrix(
+function getOctopus(
   matrix: OctopusMatrix,
   { y, x }: Position,
 ): Octopus {
@@ -87,10 +85,9 @@ function getOctopusFromMatrix(
 }
 
 function getAdjacentOctopus(
-  position: Position,
   matrix: OctopusMatrix,
+  { y, x }: Position,
 ): Array<Octopus> {
-  const { y, x } = position
   const top = y > 0 && { y: y - 1, x }
   const bottom = matrix.length > y + 1 && { y: y + 1, x }
   const left = x > 0 && { y, x: x - 1 }
@@ -111,7 +108,7 @@ function getAdjacentOctopus(
     bottomRight,
   ].filter((position) => position !== false) as Array<Position>
 
-  return positions.map((position) => getOctopusFromMatrix(matrix, position))
+  return positions.map((position) => getOctopus(matrix, position))
 }
 
 function isPeakFlash(flash: Flash): flash is PeakFlash {
@@ -131,7 +128,7 @@ export function calculateFlashes(input: string, steps: number) {
     if (flashes.length === 0) return count
 
     const [{ center }, ...succeeding] = flashes
-    const adjacent = getAdjacentOctopus(center, matrix)
+    const adjacent = getAdjacentOctopus(matrix, center)
       .map(Octopus.step)
       .filter(isPeakFlash)
 
@@ -167,7 +164,7 @@ export function calculateSynchronization(input: string) {
     if (flashes.length === 0) return
 
     const [{ center }, ...succeeding] = flashes
-    const adjacent = getAdjacentOctopus(center, matrix)
+    const adjacent = getAdjacentOctopus(matrix, center)
       .map(Octopus.step)
       .filter(isPeakFlash)
 

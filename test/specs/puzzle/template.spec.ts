@@ -9,12 +9,14 @@ describe('Part 1 ', () => {
   it('should answer example', () => {
     const data = ``
 
+    // @TODO assert against 0
     first(data)
   })
 
   it('should answer puzzle', () => {
     const data = getInput('template')
 
+    // @TODO assert against 0
     // first(data)
   })
 })
