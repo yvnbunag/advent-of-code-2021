@@ -41,22 +41,19 @@ function getAdjacentColumns(
   target: Pick<ColumnData, 'rowIndex' | 'columnIndex'>,
   map: HeightMap,
 ): AdjacentColumnData {
-  const targetColumnData = getColumnData(
-    map,
-    target.rowIndex,
-    target.columnIndex,
-  )
-  const above = target.rowIndex > 0
-    ? getColumnData(map, target.rowIndex - 1, target.columnIndex)
+  const { rowIndex, columnIndex } = target
+  const targetColumnData = getColumnData(map, rowIndex, columnIndex)
+  const above = rowIndex > 0
+    ? getColumnData(map, rowIndex - 1, columnIndex)
     : null
-  const below = map.length > target.rowIndex + 1
-    ? getColumnData(map, target.rowIndex + 1, target.columnIndex)
+  const below = map.length > rowIndex + 1
+    ? getColumnData(map, rowIndex + 1, columnIndex)
     : null
-  const left = target.columnIndex > 0
-    ? getColumnData(map, target.rowIndex, target.columnIndex - 1)
+  const left = columnIndex > 0
+    ? getColumnData(map, rowIndex, columnIndex - 1)
     : null
-  const right = map[target.rowIndex].length > target.columnIndex + 1
-    ? getColumnData(map, target.rowIndex, target.columnIndex + 1)
+  const right = map[rowIndex].length > columnIndex + 1
+    ? getColumnData(map, rowIndex, columnIndex + 1)
     : null
   const adjacent = [
     ['above', above],
@@ -69,7 +66,7 @@ function getAdjacentColumns(
   return Object.fromEntries(data)
 }
 
-function createColumnVisitLogger() {
+function createVisitRecorder() {
   const storage: Array<Array<boolean>> = []
 
   function isVisited(columnData: ColumnData): boolean {
@@ -78,7 +75,7 @@ function createColumnVisitLogger() {
     return storage?.[rowIndex]?.[columnIndex] || false
   }
 
-  function logVisit(columnData: ColumnData): boolean {
+  function record(columnData: ColumnData): boolean {
     const { rowIndex, columnIndex } = columnData
 
     if (!Array.isArray(storage[rowIndex])) storage[rowIndex] = []
@@ -88,29 +85,30 @@ function createColumnVisitLogger() {
     return storage[rowIndex][columnIndex]
   }
 
-  return { isVisited, logVisit }
+  return { isVisited, record }
 }
 
 function calculateBasinSize(
   adjacentColumnData: AdjacentColumnData,
   map: HeightMap,
-  visitLogger: ReturnType<typeof createColumnVisitLogger>,
+  visitRecorder: ReturnType<typeof createVisitRecorder>,
 ): number {
   const { target, ...adjacent } = adjacentColumnData
 
-  if (target.value === PEAK_HEIGHT) return 0
-  if (visitLogger.isVisited(target)) return 0
+  if (visitRecorder.isVisited(target)) return 0
 
-  visitLogger.logVisit(target)
+  visitRecorder.record(target)
+
+  if (target.value === PEAK_HEIGHT) return 0
 
   const basinNeighbors: Array<ColumnData> = Object.values(adjacent)
     .filter(Boolean)
-    .filter(not(visitLogger.isVisited))
+    .filter(not(visitRecorder.isVisited))
   const basinNeighborsCount = basinNeighbors
     .map((columnData) => calculateBasinSize(
       getAdjacentColumns(columnData, map),
       map,
-      visitLogger,
+      visitRecorder,
     ))
     .reduce(add, 0)
 
@@ -151,11 +149,11 @@ export function sumLowPoints(input: string): number {
 
 export function multiplyLargestBasins(input: string): number {
   const map = parseInputToHeightMap(input)
-  const visitLogger = createColumnVisitLogger()
+  const visitRecorder = createVisitRecorder()
   const basinSizes = map.reduce((accBasinSizes, row, rowIndex) => {
     const rowBasinSizes = row.reduce((rowBasinSizes, column, columnIndex) => {
       const adjacentData = getAdjacentColumns({ rowIndex, columnIndex }, map)
-      const size = calculateBasinSize(adjacentData, map, visitLogger)
+      const size = calculateBasinSize(adjacentData, map, visitRecorder)
 
       return [...rowBasinSizes, size]
     }, [] as Array<number>)
