@@ -1,7 +1,7 @@
 import { observeLanternFishSchool } from '~/puzzle/day-6'
 import { getInput } from '~/inputs'
 
-describe('Part 1 - first', () => {
+describe('Part 1', () => {
   it('should answer example', () => {
     const data = `3,4,3,1,2`
 
@@ -16,7 +16,7 @@ describe('Part 1 - first', () => {
   })
 })
 
-describe('Part 2 - second', () => {
+describe('Part 2', () => {
   it('should answer puzzle', () => {
     const data = getInput('day-6')
 

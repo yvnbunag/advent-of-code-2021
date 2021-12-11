@@ -4,7 +4,7 @@ import {
 } from '~/puzzle/day-5'
 import { getInput } from '~/inputs'
 
-describe('Part 1 - countSimpleOverlappingPoints', () => {
+describe('Part 1', () => {
   it('should answer example', () => {
     const data = `
       0,9 -> 5,9
@@ -29,7 +29,7 @@ describe('Part 1 - countSimpleOverlappingPoints', () => {
   })
 })
 
-describe('Part 2 - countOverlappingPoints', () => {
+describe('Part 2', () => {
   it('should answer example', () => {
     const data = `
       0,9 -> 5,9

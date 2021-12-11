@@ -1,7 +1,7 @@
 import { calculateRates, calculateLifeSupport } from '~/puzzle/day-3'
 import { getInput } from '~/inputs'
 
-describe('Part 1 - calculateRates', () => {
+describe('Part 1', () => {
   it('should answer example', () => {
     const report = `
       00100
@@ -35,7 +35,7 @@ describe('Part 1 - calculateRates', () => {
   })
 })
 
-describe('Part 2 - calculateLifeSupport', () => {
+describe('Part 2', () => {
   it('should answer example', () => {
     const report = `
       00100

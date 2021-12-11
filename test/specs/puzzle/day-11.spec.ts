@@ -1,11 +1,7 @@
-import { first, second } from '~/puzzle/day-11'
+import { calculateFlashes, calculateSynchronization } from '~/puzzle/day-11'
 import { getInput } from '~/inputs'
 
-describe('Methods', () => {
-  /** Methods */
-})
-
-describe('Part 1 - first', () => {
+describe('Part 1', () => {
   it('should answer example', () => {
     const data = `
       5483143223
@@ -20,17 +16,17 @@ describe('Part 1 - first', () => {
       5283751526
     `
 
-    expect(first(data, 100)).toBe(1656)
+    expect(calculateFlashes(data, 100)).toBe(1656)
   })
 
   it('should answer puzzle', () => {
     const data = getInput('day-11')
 
-    expect(first(data, 100)).toMatchInlineSnapshot(`1669`)
+    expect(calculateFlashes(data, 100)).toMatchInlineSnapshot(`1669`)
   })
 })
 
-describe('Part 2 - second', () => {
+describe('Part 2', () => {
   it('should answer example', () => {
     const data = `
       5483143223
@@ -45,12 +41,12 @@ describe('Part 2 - second', () => {
       5283751526
     `
 
-    expect(second(data)).toBe(195)
+    expect(calculateSynchronization(data)).toBe(195)
   })
 
   it('should answer puzzle', () => {
     const data = getInput('day-11')
 
-    expect(second(data)).toMatchInlineSnapshot(`351`)
+    expect(calculateSynchronization(data)).toMatchInlineSnapshot(`351`)
   })
 })

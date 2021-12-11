@@ -1,7 +1,7 @@
 import { inferOccurrences, inferOutputTotal } from '~/puzzle/day-8'
 import { getInput } from '~/inputs'
 
-describe('Part 1 - first', () => {
+describe('Part 1', () => {
   it('should answer example', () => {
     const data = `
       be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
@@ -26,7 +26,7 @@ describe('Part 1 - first', () => {
   })
 })
 
-describe('Part 2 - second', () => {
+describe('Part 2', () => {
   it('should answer example', () => {
     const data = `
       be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe

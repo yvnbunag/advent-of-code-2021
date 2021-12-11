@@ -5,7 +5,7 @@ describe('Methods', () => {
   /** Methods */
 })
 
-describe('Part 1 - first', () => {
+describe('Part 1', () => {
   it('should answer example', () => {
     const data = `
       [({(<(())[]>[[{[]{<()<>>
@@ -30,7 +30,7 @@ describe('Part 1 - first', () => {
   })
 })
 
-describe('Part 2 - second', () => {
+describe('Part 2', () => {
   it('should answer example', () => {
     const data = `
       [({(<(())[]>[[{[]{<()<>>

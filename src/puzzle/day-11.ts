@@ -1,12 +1,18 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { parseInputToList } from '~/puzzle/utils'
+import { parseInputToMatrix } from '~/puzzle/utils'
 
 type Position = {
-  x: number,
   y: number,
+  x: number,
 }
 
-type Flash = Position
+type Flash = {
+  isPeak: boolean,
+  center: Position,
+}
+
+type PeakFlash = Flash & { isPeak: true }
+
 class Octopus {
   static PEAK_ENERGY = 9
   static LOW_ENERGY = 0
@@ -14,29 +20,26 @@ class Octopus {
   readonly position: Position
 
   constructor(
-    y: number,
-    x: number,
+    y: Position['y'],
+    x: Position['x'],
     private _energy: number = Octopus.LOW_ENERGY,
   ) {
     this.position = { y, x }
   }
 
-  get energy() {
-    return this._energy
-  }
+  get energy() { return this._energy }
 
-  step(): Flash | null {
+  step(): Flash {
     const energy = this.incrementEnergy()
+    const isPeak = energy === Octopus.PEAK_ENERGY + 1
 
-    if (energy === Octopus.PEAK_ENERGY + 1) {
-      return this.position
-    }
-
-    return null
+    return { isPeak, center: this.position }
   }
 
-  settle() {
+  settle(): Octopus {
     if (this.energy > Octopus.PEAK_ENERGY) this.resetEnergy()
+
+    return this
   }
 
   private incrementEnergy() {
@@ -45,28 +48,23 @@ class Octopus {
     return this._energy
   }
 
-  private resetEnergy() {
-    this._energy = Octopus.LOW_ENERGY
-  }
+  private resetEnergy() { this._energy = Octopus.LOW_ENERGY }
 
   static step(octopus: Octopus): ReturnType<Octopus['step']> {
     return octopus.step()
   }
 
-  static settle(octopus: Octopus) {
-    octopus.settle()
+  static settle(octopus: Octopus): ReturnType<Octopus['settle']> {
+    return octopus.settle()
   }
 
   static getPosition(octopus: Octopus): Position {
     return octopus.position
   }
-
-  static getEnergy(octopus: Octopus): Octopus['energy'] {
-    return octopus.energy
-  }
 }
 
 type OctopusRow = Array<Octopus>
+
 type OctopusMatrix = Array<OctopusRow>
 
 function toOctopusMatrix(row: Array<number>, y: number): OctopusRow {
@@ -75,39 +73,10 @@ function toOctopusMatrix(row: Array<number>, y: number): OctopusRow {
   })
 }
 
-function getOctopusMatrixEnergy(
-  matrix: OctopusMatrix,
-): Array<Array<Octopus['energy']>> {
-  return matrix.map((row) => row
-    .map(Octopus.getEnergy)
-    .map((energy) => (energy > 9 ? 'X' : energy) as Octopus['energy']),
-  )
-}
-
-function getAdjacentOctopus(
-  position: Position,
-  matrix: OctopusMatrix,
-): Array<Position> {
-  const { y, x } = position
-  const top = y > 0 ? { y: y - 1, x } : null
-  const bottom = matrix.length > y + 1 ? { y: y + 1, x } : null
-  const left = x > 0 ? { y, x: x - 1 } : null
-  const right = matrix[y].length > x + 1 ? { y, x: x + 1 } : null
-  const topLeft = top && left ? { y: top.y, x: left.x } : null
-  const topRight = top && right ? { y: top.y, x: right.x } : null
-  const bottomLeft = bottom && left ? { y: bottom.y, x: left.x } : null
-  const bottomRight = bottom && right ? { y: bottom.y, x: right.x } : null
-
-  return [
-    top,
-    bottom,
-    left,
-    right,
-    topLeft,
-    topRight,
-    bottomLeft,
-    bottomRight,
-  ].filter((position) => position !== null) as Array<Position>
+function parseToOctopusMatrix(input: string): OctopusMatrix {
+  return parseInputToMatrix(input)
+    .map((row) => row.map(Number))
+    .map(toOctopusMatrix)
 }
 
 function getOctopusFromMatrix(
@@ -117,75 +86,113 @@ function getOctopusFromMatrix(
   return matrix[y][x]
 }
 
-function parseToOctopusMatrix(input: string): OctopusMatrix {
-  return parseInputToList(input)
-    .map((row) => row.split('').map(Number))
-    .map(toOctopusMatrix)
+function getAdjacentOctopus(
+  position: Position,
+  matrix: OctopusMatrix,
+): Array<Octopus> {
+  const { y, x } = position
+  const top = y > 0 && { y: y - 1, x }
+  const bottom = matrix.length > y + 1 && { y: y + 1, x }
+  const left = x > 0 && { y, x: x - 1 }
+  const right = matrix[y].length > x + 1 && { y, x: x + 1 }
+  const topLeft = top && left && { y: top.y, x: left.x }
+  const topRight = top && right && { y: top.y, x: right.x }
+  const bottomLeft = bottom && left && { y: bottom.y, x: left.x }
+  const bottomRight = bottom && right && { y: bottom.y, x: right.x }
+
+  const positions = [
+    top,
+    bottom,
+    left,
+    right,
+    topLeft,
+    topRight,
+    bottomLeft,
+    bottomRight,
+  ].filter((position) => position !== false) as Array<Position>
+
+  return positions.map((position) => getOctopusFromMatrix(matrix, position))
 }
 
-export function first(input: string, steps: number) {
-  const matrix = parseToOctopusMatrix(input)
-  let currentStep = steps
-  let flashCount = 0
-
-  while (currentStep > 0) {
-    const flashes: Array<Flash> = matrix
-      .flatMap((row) => row.map(Octopus.step))
-      .filter(Boolean) as Array<Flash>
-
-    while (flashes.length) {
-      flashCount = flashCount + 1
-
-      const flash = flashes.shift() as Flash
-      const adjacentFlashes = getAdjacentOctopus(flash, matrix)
-        .map((position) => getOctopusFromMatrix(matrix, position))
-        .map(Octopus.step) as Array<Flash>
-
-      flashes.push(...adjacentFlashes.filter(Boolean))
-    }
-
-    matrix.forEach((row) => row.forEach(Octopus.settle))
-
-    // const print = getOctopusMatrixEnergy(matrix)
-    //   .map((row) => row.join(''))
-    //   .join('\n')
-    // console.log(print)
-
-    currentStep = currentStep - 1
-  }
-
-  return flashCount
+function isPeakFlash(flash: Flash): flash is PeakFlash {
+  return flash.isPeak
 }
 
-export function second(input: string) {
-  const matrix = parseToOctopusMatrix(input)
-  let step = 0
-  let flashed = false
+function isSynchronized(matrix: OctopusMatrix): boolean {
+  return !matrix.some((row) => row.some((octopus) => octopus.energy > 0))
+}
 
-  while (!flashed) {
-    step = step + 1
+export function calculateFlashes(input: string, steps: number) {
+  function spreadFlash(
+    matrix: OctopusMatrix,
+    flashes: Array<PeakFlash>,
+    count = 0,
+  ): number {
+    if (flashes.length === 0) return count
 
-    const flashes: Array<Flash> = matrix
-      .flatMap((row) => row.map(Octopus.step))
-      .filter(Boolean) as Array<Flash>
+    const [{ center }, ...succeeding] = flashes
+    const adjacent = getAdjacentOctopus(center, matrix)
+      .map(Octopus.step)
+      .filter(isPeakFlash)
 
-    while (flashes.length) {
-      const flash = flashes.shift() as Flash
-      const adjacentFlashes = getAdjacentOctopus(flash, matrix)
-        .map((position) => getOctopusFromMatrix(matrix, position))
-        .map(Octopus.step) as Array<Flash>
-
-      flashes.push(...adjacentFlashes.filter(Boolean))
-    }
-
-    matrix.forEach((row) => row.forEach(Octopus.settle))
-
-    const isSynchronized = !matrix.some((row) => {
-      return row.some((octopus) => octopus.energy > 0)
-    })
-
-    if (isSynchronized) flashed = true
+    return spreadFlash(matrix, [...succeeding, ...adjacent], count + 1)
   }
 
-  return step
+  function calculate(
+    matrix: OctopusMatrix,
+    steps: number,
+    count = 0,
+  ): number {
+    if (steps === 0) return count
+
+    const flashes = matrix
+      .flatMap((row) => row.map(Octopus.step))
+      .filter(isPeakFlash)
+    const spreadCount = spreadFlash(matrix, flashes)
+    const settledMatrix = matrix.map((row) => row.map(Octopus.settle))
+
+    return calculate(settledMatrix, steps - 1, count + spreadCount)
+  }
+
+  const matrix = parseToOctopusMatrix(input)
+
+  return calculate(matrix, steps)
+}
+
+export function calculateSynchronization(input: string) {
+  function spreadFlash(
+    matrix: OctopusMatrix,
+    flashes: Array<PeakFlash>,
+  ): void {
+    if (flashes.length === 0) return
+
+    const [{ center }, ...succeeding] = flashes
+    const adjacent = getAdjacentOctopus(center, matrix)
+      .map(Octopus.step)
+      .filter(isPeakFlash)
+
+    return spreadFlash(matrix, [...succeeding, ...adjacent])
+  }
+
+  function calculate(
+    matrix: OctopusMatrix,
+    until: (matrix: OctopusMatrix)=> boolean,
+    steps = 1,
+  ): number {
+    const flashes = matrix
+      .flatMap((row) => row.map(Octopus.step))
+      .filter(isPeakFlash)
+
+    spreadFlash(matrix, flashes)
+
+    const settledMatrix = matrix.map((row) => row.map(Octopus.settle))
+
+    if (until(settledMatrix)) return steps
+
+    return calculate(settledMatrix, until, steps + 1)
+  }
+
+  const matrix = parseToOctopusMatrix(input)
+
+  return calculate(matrix, isSynchronized)
 }
