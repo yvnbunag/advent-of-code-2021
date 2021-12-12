@@ -5,3 +5,7 @@ export function not<WrappedPredicate extends Predicate>(
 ): Predicate {
   return (...args: Array<unknown>) => !predicate(...args)
 }
+
+export function isLowerCase(value: string): boolean {
+  return value === value.toLowerCase()
+}

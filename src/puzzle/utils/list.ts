@@ -16,3 +16,9 @@ export function sortByLetter(list: Array<string>): Array<string> {
     return first.toLowerCase().localeCompare(second.toLowerCase())
   })
 }
+
+export function getLastEntry<Entries extends Array<any>>(
+  entries: Entries,
+): Entries extends { length: 0 } ? undefined : Entries[number] {
+  return entries[entries.length - 1]
+}

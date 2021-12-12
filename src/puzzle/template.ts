@@ -1,19 +1,20 @@
 import { parseInputToList } from '~/puzzle/utils'
 
-// @TODO remove return types
+/**
+ * BEFORE YOU START
+ *  - KISS
+ *  - Avoid premature parser
+ *  - Avoid premature optimization
+ */
 
-type First = unknown
-
-type Second = unknown
-
-export function first(input: string): First {
+export function first(input: string) {
   const data = parseInputToList(input)
 
-  return data
+  return 0
 }
 
-export function second(input: string): Second {
+export function second(input: string) {
   const data = parseInputToList(input)
 
-  return data
+  return 0
 }

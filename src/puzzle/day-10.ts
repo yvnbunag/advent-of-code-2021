@@ -2,6 +2,8 @@ import { parseInputToList } from '~/puzzle/utils'
 
 import { add, subtract } from '~/puzzle/utils/number'
 
+// @TODO Major Refactor
+
 type First = unknown
 
 type Second = unknown

@@ -9,15 +9,13 @@ describe('Part 1 ', () => {
   it('should answer example', () => {
     const data = ``
 
-    // @TODO assert against 0
-    first(data)
+    expect(first(data)).toBe(0)
   })
 
   it('should answer puzzle', () => {
     const data = getInput('template')
 
-    // @TODO assert against 0
-    // first(data)
+    expect(first(data)).toMatchInlineSnapshot(`0`)
   })
 })
 
@@ -25,12 +23,12 @@ describe('Part 2', () => {
   it('should answer example', () => {
     const data = ``
 
-    // second(data)
+    expect(second(data)).toBe(0)
   })
 
   it('should answer puzzle', () => {
     const data = getInput('template')
 
-    // second(data)
+    expect(second(data)).toMatchInlineSnapshot(`0`)
   })
 })
