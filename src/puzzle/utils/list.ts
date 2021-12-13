@@ -17,8 +17,13 @@ export function sortByLetter(list: Array<string>): Array<string> {
   })
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getLastEntry<Entries extends Array<any>>(
   entries: Entries,
 ): Entries extends { length: 0 } ? undefined : Entries[number] {
   return entries[entries.length - 1]
+}
+
+export function getHighestValue(list: Array<number>): number {
+  return list.reduce((current, next) => Math.max(current, next), -Infinity)
 }

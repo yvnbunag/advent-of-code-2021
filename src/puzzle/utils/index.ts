@@ -7,6 +7,7 @@ export * as number from '~/puzzle/utils/number'
 export * as list from '~/puzzle/utils/list'
 export * as string from '~/puzzle/utils/string'
 export * as object from '~/puzzle/utils/object'
+export * as matrix from '~/puzzle/utils/matrix'
 
 import { trim } from '~/puzzle/utils/string'
 
