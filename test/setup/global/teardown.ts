@@ -1,3 +1,6 @@
+/* eslint-disable import/order */
+import rimraf from 'rimraf'
+
 export default function teardown() {
-  // Run global teardown
+  rimraf.sync('temp/*')
 }

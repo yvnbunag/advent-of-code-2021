@@ -2,6 +2,7 @@
   "setupFilesAfterEnv": ["<rootDir>/test/setup/setup-files-after-env.ts"],
   "globalSetup": "<rootDir>/test/setup/global/setup.ts",
   "globalTeardown": "<rootDir>/test/setup/global/teardown.ts",
+  "testTimeout": 10000000,
   "transform": {
     "^.+\\.(ts)$": "ts-jest"
   },
