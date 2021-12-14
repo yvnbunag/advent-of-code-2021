@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { fold, countPixels, plot } from '~/puzzle/day-13'
 import { getInput } from '~/inputs'
 
