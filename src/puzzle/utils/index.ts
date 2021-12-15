@@ -22,7 +22,7 @@ export function parseInputToList(
     .filter(Boolean)
 }
 
-export function parseInputToMatrix(
+export function parseInputToMatrix<Value>(
   input: string,
   xDelimiter = '\n',
   yDelimiter = '',

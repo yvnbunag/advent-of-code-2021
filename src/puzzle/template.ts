@@ -5,6 +5,7 @@ import { parseInputToList } from '~/puzzle/utils'
  *  - KISS
  *  - Avoid premature parser
  *  - Avoid premature optimization
+ *  - Memoize, Memoize
  */
 
 export function first(input: string) {
