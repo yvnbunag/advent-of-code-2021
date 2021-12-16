@@ -9,7 +9,7 @@ export * as string from '~/puzzle/utils/string'
 export * as object from '~/puzzle/utils/object'
 export * as matrix from '~/puzzle/utils/matrix'
 export * as file from '~/puzzle/utils/file'
-export * as method from '~/puzzle/utils/method'
+export * as cache from '~/puzzle/utils/cache'
 
 import { trim } from '~/puzzle/utils/string'
 
@@ -23,7 +23,7 @@ export function parseInputToList(
     .filter(Boolean)
 }
 
-export function parseInputToMatrix<Value>(
+export function parseInputToMatrix(
   input: string,
   xDelimiter = '\n',
   yDelimiter = '',

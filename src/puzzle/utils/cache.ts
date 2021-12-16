@@ -20,11 +20,11 @@ export const {
   }
 })()
 
-const memoKey: unique symbol = Symbol('keyed')
-export type Keyed = { [key in typeof memoKey]: true }
+declare const memoKeyed: unique symbol
+export type MemoKeyed = { [key in typeof memoKeyed]: true }
 
 export const {
-  toMemo,
+  toMemoKeyed,
   getMemoKey,
 } = (() => {
   type AnyReference = Record<string | number | symbol, unknown>
@@ -35,39 +35,40 @@ export const {
   resetCacheListen(() => cache = new WeakMap())
   resetCacheListen(() => counter = 0)
 
-  function toMemo<
+  function toMemoKeyed<
     Reference extends AnyReference,
-  >(reference: Reference): Reference & Keyed {
+  >(reference: Reference): Reference & MemoKeyed {
     const key = `memo-${counter++}`
 
     cache.set(reference, key)
 
-    return reference as Reference & Keyed
+    return reference as Reference & MemoKeyed
   }
 
-  function getMemoKey(reference: Keyed): string {
+  function getMemoKey(reference: MemoKeyed): string {
     if (cache.has(reference)) return cache.get(reference)
 
     throw new Error(`${JSON.stringify(reference)} has no memoization key`)
   }
 
   return {
-    toMemo,
+    toMemoKeyed,
     getMemoKey,
   }
 })()
 
 type MemoizeOptions<Method extends (...args: Array<unknown>)=> unknown> = {
   disabled?: boolean,
-  getKey: (...args: Parameters<Method>)=> string,
+  getKey?: (...args: Parameters<Method>)=> Array<string>,
 }
 
 export function memoize<
-  Method extends (...args: Array<unknown>)=> never,
+  Method extends (...args: Array<any>)=> any,
 >(
   method: Method,
-  { getKey, disabled = false }: MemoizeOptions<Method>,
+  options: MemoizeOptions<Method> = {},
 ): (...args: Parameters<Method>)=> ReturnType<Method> {
+  const { disabled = false, getKey = (...args) => args } = options
   if (disabled) return method
 
   let cache: Record<string, ReturnType<Method>> = {}
@@ -75,7 +76,7 @@ export function memoize<
   resetCacheListen(() => cache = {})
 
   return (...args)=> {
-    const key = getKey(...args)
+    const key = getKey(...args).join('-')
 
     if (!(key in cache)) cache[key] = method(...args)
 
