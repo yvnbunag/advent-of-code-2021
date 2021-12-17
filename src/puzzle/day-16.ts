@@ -179,6 +179,7 @@ export function first(input: string) {
     const packet = queue.pop() as Packet
     totalVersions = totalVersions + getVersion(packet)
 
+
     if (isLiteral(packet)) continue
 
     const lengthTypeID = getOperatorLengthTypeID(packet)
@@ -210,17 +211,16 @@ export function first(input: string) {
             packet,
             18,
           )
-          const div = Math.floor(sp.length / count) || 0
-          const sliced = []
+          const sliced = sp.splice(0, count)
 
-          while(sp.length) {
-            sliced.push(sp.splice(0, div))
+          if (sp.length) {
+            // @ts-expect-error asd
+            sliced[sliced.length - 1] = sliced[sliced.length - 1] + sp.join('')
           }
 
-          return sliced.filter(Boolean).map((v) => v.join(''))
+          return sliced
         })()
 
-      // @ts-expect-error asd
       queue.push(...subPackets)
     }
   }

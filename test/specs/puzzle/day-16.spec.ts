@@ -88,7 +88,7 @@ describe('Methods', () => {
 })
 
 describe('Part 1 ', () => {
-  it('should answer example', () => {
+  it.only('should answer example', () => {
     expect(first('38006F45291200')).toBe(9)
     expect(first('EE00D40C823060')).toBe(14)
     expect(first('8A004A801A8002F478')).toBe(16)

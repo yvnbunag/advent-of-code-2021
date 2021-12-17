@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Methods shoot 1`] = `
+Object {
+  "position": Object {
+    "x": 0,
+    "y": 0,
+  },
+  "trajectory": Object {
+    "x": 7,
+    "y": 2,
+  },
+}
+`;
+
+exports[`Methods shoot 2`] = `
+Object {
+  "position": Object {
+    "x": 7,
+    "y": 2,
+  },
+  "trajectory": Object {
+    "x": 6,
+    "y": 1,
+  },
+}
+`;
+
+exports[`Methods shoot 3`] = `
+Object {
+  "position": Object {
+    "x": 13,
+    "y": 3,
+  },
+  "trajectory": Object {
+    "x": 5,
+    "y": 0,
+  },
+}
+`;
+
+exports[`Methods shoot 4`] = `
+Object {
+  "position": Object {
+    "x": 18,
+    "y": 3,
+  },
+  "trajectory": Object {
+    "x": 4,
+    "y": -1,
+  },
+}
+`;
+
+exports[`Methods shoot 5`] = `
+Object {
+  "position": Object {
+    "x": 22,
+    "y": 2,
+  },
+  "trajectory": Object {
+    "x": 3,
+    "y": -2,
+  },
+}
+`;
+
+exports[`Methods shoot 6`] = `
+Object {
+  "position": Object {
+    "x": 25,
+    "y": 0,
+  },
+  "trajectory": Object {
+    "x": 2,
+    "y": -3,
+  },
+}
+`;
+
+exports[`Methods shoot 7`] = `
+Object {
+  "position": Object {
+    "x": 27,
+    "y": -3,
+  },
+  "trajectory": Object {
+    "x": 1,
+    "y": -4,
+  },
+}
+`;
+
+exports[`Methods shoot 8`] = `
+Object {
+  "position": Object {
+    "x": 28,
+    "y": -7,
+  },
+  "trajectory": Object {
+    "x": 0,
+    "y": -5,
+  },
+}
+`;
